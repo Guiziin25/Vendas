@@ -8,7 +8,6 @@ left to right direction
 package "Clientes e Funcionários" {
     class Cliente {
       +id: Long
-      +senha: String
       +nome: String
       +email: String
       +telefone: String
@@ -18,7 +17,6 @@ package "Clientes e Funcionários" {
     class Funcionario {
       +id: Long
       +nome: String
-      +senha: String
       +email: String
       +cargo: String
     }
@@ -85,13 +83,13 @@ package "Pagamento e Promoções" {
     }
 }
 
-' ===== RELACIONAMENTOS =====
+' ===== RELACIONAMENTOS (reposicionados para clareza) =====
 
 Carrinho --> Cliente : pertence a
-Carrinho  --> ItemCarrinho : contém
+Carrinho "1" --> "0..*" ItemCarrinho : contém
 ItemCarrinho --> Produto : refere-se a
 
-Venda  -->  ItemVenda : contém
+Venda "1" --> "1..*" ItemVenda : contém
 ItemVenda --> Produto : vendido
 Venda --> Cliente : para
 Venda --> Pagamento : pagamento
