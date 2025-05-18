@@ -4,9 +4,10 @@ public class Payments {
     private String method;
     private String status;
 
-    public Payments(String method, String status) {
+    //Cria o Pagamento com o status PENDENTE até sua validação
+    public Payments(String method) {
         this.method = method;
-        this.status = status;
+        this.status = "PENDENTE";
     }
 
     public String getMethod() {
