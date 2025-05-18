@@ -43,7 +43,7 @@ public class Employee {
 
     public void setPassword(String password) {
         //Validação se senha não é vazia e se tem no mínimo 8 caracteres
-        if (password != null && password.length() >= 8) {
+        if (password != null && password.trim().length() >= 8) {
             this.password = password.trim();
         }
     }
