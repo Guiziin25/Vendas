@@ -2,19 +2,19 @@ package Person;
 
 public class Client {
     private Long id;
-    private String passoword;
+    private String password;
     private String name;
     private String email;
     private String phone;
     private String address;
 
-    public Client(Long id, String passoword, String name, String email, String phone, String address) {
+    public Client(Long id, String password, String name, String email, String phone, String address) {
         this.id = id;
-        this.passoword = passoword;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-        this.address = address;
+        setPassword(password);
+        setName(name);
+        setEmail(email);
+        setPhone(phone);
+        setAddress(address);
     }
 
     public Long getId() {
@@ -25,12 +25,15 @@ public class Client {
         this.id = id;
     }
 
-    public String getPassoword() {
-        return passoword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPassoword(String passoword) {
-        this.passoword = passoword;
+    public void setPassword(String password) {
+        //Validação se senha não é vazia e se tem no mínimo 8 caracteres
+        if (password != null && password.length() >= 8) {
+            this.password = password.trim();
+        }
     }
 
     public String getName() {
@@ -38,7 +41,10 @@ public class Client {
     }
 
     public void setName(String name) {
-        this.name = name;
+        //Validação se nome não é vazio ou incompleto
+        if (name != null && name.trim().contains(" ")) {
+            this.name = name.trim();
+        }
     }
 
     public String getEmail() {
@@ -46,7 +52,10 @@ public class Client {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        //Validação se o email está no formato correto
+        if (email != null && email.contains("@")){
+            this.email = email.trim();
+        }
     }
 
     public String getPhone() {
@@ -54,7 +63,10 @@ public class Client {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        //Validação se telefone não é vazio ou diferente de 11 dígitos(ddd + número)
+        if (phone != null && phone.length() == 11) {
+            this.phone = phone.trim();
+        }
     }
 
     public String getAddress() {
@@ -62,7 +74,10 @@ public class Client {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        //Validação se endereço não é vazio
+        if (address != null) {
+            this.address = address.trim();
+        }
     }
 }
 
