@@ -1,18 +1,21 @@
 package Person;
 
+import Product.Products;
+
 public class Employee {
     private Long id;
     private String name;
     private String password;
-    private String mail;
+    private String email;
     private String cargo;
+    private Products gerencia;
 
     public Employee(Long id, String name, String password, String mail, String cargo) {
         this.id = id;
-        this.name = name;
-        this.password = password;
-        this.mail = mail;
-        this.cargo = cargo;
+        setName(name);
+        setPassword(password);
+        setEmail(mail);
+        setCargo(cargo);
     }
 
     public Long getId() {
@@ -28,7 +31,10 @@ public class Employee {
     }
 
     public void setName(String name) {
-        this.name = name;
+        //Validação se nome não é vazio ou incompleto
+        if (name != null && name.trim().contains(" ")) {
+            this.name = name.trim();
+        }
     }
 
     public String getPassword() {
@@ -36,15 +42,21 @@ public class Employee {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        //Validação se senha não é vazia e se tem no mínimo 8 caracteres
+        if (password != null && password.length() >= 8) {
+            this.password = password.trim();
+        }
     }
 
-    public String getMail() {
-        return mail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setMail(String mail) {
-        this.mail = mail;
+    public void setEmail(String email) {
+        //Validação se o email está no formato correto
+        if (email != null && email.contains("@")){
+            this.email = email.trim();
+        }
     }
 
     public String getCargo() {
@@ -52,6 +64,16 @@ public class Employee {
     }
 
     public void setCargo(String cargo) {
-        this.cargo = cargo;
+        if (cargo != null) {
+            this.cargo = cargo.trim();
+        }
+    }
+
+    public Products getManager() {
+        return gerencia;
+    }
+
+    public void setManager(Products gerencia) {
+        this.gerencia = gerencia;
     }
 }
