@@ -64,8 +64,8 @@ public class Client {
 
     public void setPhone(String phone) {
         //Validação se telefone não é vazio ou diferente de 11 dígitos(ddd + número)
-        if (phone != null && phone.length() == 11) {
-            this.phone = phone.trim();
+        if (phone != null && phone.replaceAll("\\s","").length() == 11) {
+            this.phone = phone.replaceAll("\\s","");
         }
     }
 
