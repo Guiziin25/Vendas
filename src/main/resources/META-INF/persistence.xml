@@ -1,0 +1,40 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+
+    <persistence-unit name="my-persistence-unit">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Classes de entidade -->
+        <class>com.application.model.Categoria</class>
+        <class>com.application.model.Produto</class>
+        <class>com.application.model.Cliente</class>
+        <class>com.application.model.Funcionario</class>
+        <class>com.application.model.Venda</class>
+        <class>com.application.model.ItemVenda</class>
+        <class>com.application.model.Pagamento</class>
+        <class>com.application.model.CupomDesconto</class>
+        <class>com.application.model.Carrinho</class>
+        <class>com.application.model.ItemCarrinho</class>
+        <class>com.application.model.ImagemProduto</class>
+        <class>com.application.model.Estoque</class>
+
+
+        <properties>
+            <!-- Configurações do banco de dados -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <!-- Configurações do Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- Atualiza o esquema do banco de dados -->
+            <property name="hibernate.show_sql" value="true"/> <!-- Mostra as consultas SQL no console -->
+            <property name="hibernate.format_sql" value="true"/> <!-- Formata as consultas SQL -->
+            <property name="hibernate.use_sql_comments" value="true"/> <!-- Adiciona comentários SQL -->
+        </properties>
+    </persistence-unit>
+</persistence>

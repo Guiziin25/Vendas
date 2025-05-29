@@ -1,0 +1,556 @@
+@startuml
+
+skinparam class {
+    BackgroundColor<<Interface>> LightGray
+    BorderColor<<Interface>> #444
+    ArrowColor #555
+    BackgroundColor<<Entity>> #E6E6FA
+    BackgroundColor<<Service>> #F5F5DC
+    BackgroundColor<<Repository>> #E0FFFF
+    BackgroundColor<<Controller>> #FFE4E1
+    BackgroundColor<<Enum>> #F0FFF0
+}
+
+package "Model" {
+    class Produto <<Entity>> {
+        - id: int
+        - nome: String
+        - descricao: String
+        - preco: double
+        - precoPromocional: double
+        - emPromocao: boolean
+        - dataCadastro: Date
+        + getters/setters()
+    }
+
+    class Categoria <<Entity>> {
+        - id: int
+        - nome: String
+        - descricao: String
+        + getters/setters()
+    }
+
+    class ImagemProduto <<Entity>> {
+        - id: int
+        - caminho: String
+        - principal: boolean
+        + getters/setters()
+    }
+
+    class Cliente <<Entity>> {
+        - id: int
+        - nome: String
+        - email: String
+        - senha: String
+        - enderecos: List<Endereco>
+        - telefone: String
+        - dataCadastro: Date
+        + getters/setters()
+    }
+
+    class Endereco <<Entity>> {
+        - id: int
+        - logradouro: String
+        - numero: String
+        - complemento: String
+        - cidade: String
+        - estado: String
+        - cep: String
+        + getters/setters()
+    }
+
+    class Funcionario <<Entity>> {
+        - id: int
+        - nome: String
+        - email: String
+        - senha: String
+        - cargo: CargoFuncionario
+        - dataCadastro: Date
+        + getters/setters()
+    }
+
+    enum CargoFuncionario <<Enum>> {
+        ADMINISTRADOR
+        VENDEDOR
+        ATENDENTE
+    }
+
+    class Estoque <<Entity>> {
+        - id: int
+        - quantidade: int
+        - limiteMinimo: int
+        - dataAtualizacao: Date
+        + getters/setters()
+    }
+
+    class Venda <<Entity>> {
+        - id: int
+        - data: Date
+        - status: StatusVenda
+        - valorFrete: double
+        - valorTotal: double
+        + getters/setters()
+    }
+
+    enum StatusVenda <<Enum>> {
+        PENDENTE
+        PAGO
+        ENVIADO
+        ENTREGUE
+        CANCELADO
+    }
+
+    class ItemVenda <<Entity>> {
+        - id: int
+        - quantidade: int
+        - precoUnitario: double
+        + getters/setters()
+    }
+
+    class Pagamento <<Entity>> {
+        - id: int
+        - valor: double
+        - data: Date
+        - metodo: MetodoPagamento
+        - status: StatusPagamento
+        + getters/setters()
+    }
+
+    enum StatusPagamento <<Enum>> {
+        PENDENTE
+        APROVADO
+        RECUSADO
+        REEMBOLSADO
+    }
+
+    enum MetodoPagamento <<Enum>> {
+        CARTAO_CREDITO
+        BOLETO
+        PIX
+        PAYPAL
+    }
+
+    class CupomDesconto <<Entity>> {
+        - id: int
+        - codigo: String
+        - valorDesconto: double
+        - tipo: TipoDesconto
+        - dataValidade: Date
+        - ativo: boolean
+        + getters/setters()
+    }
+
+    enum TipoDesconto <<Enum>> {
+        PORCENTAGEM
+        VALOR_FIXO
+    }
+
+    class Carrinho <<Entity>> {
+        - id: int
+        - dataCriacao: Date
+        + getters/setters()
+    }
+
+    class ItemCarrinho <<Entity>> {
+        - id: int
+        - quantidade: int
+        + getters/setters()
+    }
+}
+
+package "DAO" <<Folder>> {
+    interface IProdutoDAO <<Interface>> {
+        + cadastrar(produto: Produto): void
+        + editar(produto: Produto): void
+        + excluir(id: int): void
+        + buscarPorId(id: int): Produto
+        + listar(): List<Produto>
+        + buscarPorCategoria(categoriaId: int): List<Produto>
+        + buscarPorNome(nome: String): List<Produto>
+    }
+
+    interface ICategoriaDAO <<Interface>> {
+        + cadastrar(categoria: Categoria): void
+        + editar(categoria: Categoria): void
+        + excluir(id: int): void
+        + buscarPorId(id: int): Categoria
+        + listar(): List<Categoria>
+    }
+
+    interface IClienteDAO <<Interface>> {
+        + cadastrar(cliente: Cliente): void
+        + editar(cliente: Cliente): void
+        + buscarPorId(id: int): Cliente
+        + buscarPorEmail(email: String): Cliente
+        + listar(): List<Cliente>
+    }
+
+    interface IFuncionarioDAO <<Interface>> {
+        + cadastrar(funcionario: Funcionario): void
+        + editar(funcionario: Funcionario): void
+        + buscarPorId(id: int): Funcionario
+        + buscarPorEmail(email: String): Funcionario
+        + listar(): List<Funcionario>
+    }
+
+    interface IVendaDAO <<Interface>> {
+        + cadastrar(venda: Venda): void
+        + buscarPorId(id: int): Venda
+        + listar(): List<Venda>
+        + listarPorCliente(clienteId: int): List<Venda>
+        + listarPorPeriodo(inicio: Date, fim: Date): List<Venda>
+    }
+
+    interface IEstoqueDAO <<Interface>> {
+        + atualizar(estoque: Estoque): void
+        + buscarPorProduto(produtoId: int): Estoque
+        + listarComBaixoEstoque(): List<Estoque>
+    }
+
+    interface ICupomDAO <<Interface>> {
+        + cadastrar(cupom: CupomDesconto): void
+        + editar(cupom: CupomDesconto): void
+        + buscarPorCodigo(codigo: String): CupomDesconto
+        + listarAtivos(): List<CupomDesconto>
+    }
+
+    interface ICarrinhoDAO <<Interface>> {
+        + salvar(carrinho: Carrinho): void
+        + buscarPorCliente(clienteId: int): Carrinho
+        + adicionarItem(item: ItemCarrinho): void
+        + removerItem(itemId: int): void
+    }
+
+    class ProdutoDAO <<Repository>> implements IProdutoDAO {
+        - entityManager: EntityManager
+        + cadastrar(produto: Produto): void
+        + editar(produto: Produto): void
+        + excluir(id: int): void
+        + buscarPorId(id: int): Produto
+        + listar(): List<Produto>
+        + buscarPorCategoria(categoriaId: int): List<Produto>
+        + buscarPorNome(nome: String): List<Produto>
+    }
+
+    class CategoriaDAO <<Repository>> implements ICategoriaDAO {
+        - entityManager: EntityManager
+        + cadastrar(categoria: Categoria): void
+        + editar(categoria: Categoria): void
+        + excluir(id: int): void
+        + buscarPorId(id: int): Categoria
+        + listar(): List<Categoria>
+    }
+
+    class ClienteDAO <<Repository>> implements IClienteDAO {
+        - entityManager: EntityManager
+        + cadastrar(cliente: Cliente): void
+        + editar(cliente: Cliente): void
+        + buscarPorId(id: int): Cliente
+        + buscarPorEmail(email: String): Cliente
+        + listar(): List<Cliente>
+    }
+
+    class FuncionarioDAO <<Repository>> implements IFuncionarioDAO {
+        - entityManager: EntityManager
+        + cadastrar(funcionario: Funcionario): void
+        + editar(funcionario: Funcionario): void
+        + buscarPorId(id: int): Funcionario
+        + buscarPorEmail(email: String): Funcionario
+        + listar(): List<Funcionario>
+    }
+
+    class VendaDAO <<Repository>> implements IVendaDAO {
+        - entityManager: EntityManager
+        + cadastrar(venda: Venda): void
+        + buscarPorId(id: int): Venda
+        + listar(): List<Venda>
+        + listarPorCliente(clienteId: int): List<Venda>
+        + listarPorPeriodo(inicio: Date, fim: Date): List<Venda>
+    }
+
+    class EstoqueDAO <<Repository>> implements IEstoqueDAO {
+        - entityManager: EntityManager
+        + atualizar(estoque: Estoque): void
+        + buscarPorProduto(produtoId: int): Estoque
+        + listarComBaixoEstoque(): List<Estoque>
+    }
+
+    class CupomDAO <<Repository>> implements ICupomDAO {
+        - entityManager: EntityManager
+        + cadastrar(cupom: CupomDesconto): void
+        + editar(cupom: CupomDesconto): void
+        + buscarPorCodigo(codigo: String): CupomDesconto
+        + listarAtivos(): List<CupomDesconto>
+    }
+
+    class CarrinhoDAO <<Repository>> implements ICarrinhoDAO {
+        - entityManager: EntityManager
+        + salvar(carrinho: Carrinho): void
+        + buscarPorCliente(clienteId: int): Carrinho
+        + adicionarItem(item: ItemCarrinho): void
+        + removerItem(itemId: int): void
+    }
+}
+
+package "Service" <<Folder>> {
+    interface IProdutoService <<Interface>> {
+        + cadastrarProduto(produto: Produto, imagens: List<ImagemProduto>): void
+        + editarProduto(produto: Produto): void
+        + removerProduto(id: int): void
+        + buscarProduto(id: int): Produto
+        + listarProdutos(): List<Produto>
+        + listarPorCategoria(categoriaId: int): List<Produto>
+        + adicionarImagem(produtoId: int, imagem: ImagemProduto): void
+        + removerImagem(imagemId: int): void
+    }
+
+    interface ICategoriaService <<Interface>> {
+        + cadastrarCategoria(categoria: Categoria): void
+        + editarCategoria(categoria: Categoria): void
+        + removerCategoria(id: int): void
+        + buscarCategoria(id: int): Categoria
+        + listarCategorias(): List<Categoria>
+    }
+
+    interface IClienteService <<Interface>> {
+        + cadastrarCliente(cliente: Cliente): void
+        + editarCliente(cliente: Cliente): void
+        + buscarCliente(id: int): Cliente
+        + autenticar(email: String, senha: String): Cliente
+        + recuperarSenha(email: String): void
+    }
+
+    interface IFuncionarioService <<Interface>> {
+        + cadastrarFuncionario(funcionario: Funcionario): void
+        + editarFuncionario(funcionario: Funcionario): void
+        + buscarFuncionario(id: int): Funcionario
+        + autenticar(email: String, senha: String): Funcionario
+    }
+
+    interface IVendaService <<Interface>> {
+        + realizarVenda(venda: Venda, itens: List<ItemVenda>, pagamento: Pagamento): void
+        + cancelarVenda(vendaId: int): void
+        + buscarVenda(id: int): Venda
+        + listarVendas(): List<Venda>
+        + gerarRelatorioVendas(inicio: Date, fim: Date): RelatorioVendas
+        + gerarNotaFiscal(vendaId: int): NotaFiscal
+    }
+
+    interface IEstoqueService <<Interface>> {
+        + atualizarEstoque(produtoId: int, quantidade: int): void
+        + verificarDisponibilidade(produtoId: int, quantidade: int): boolean
+        + listarProdutosComBaixoEstoque(): List<Estoque>
+        + definirLimiteMinimo(produtoId: int, limite: int): void
+    }
+
+    interface ICupomService <<Interface>> {
+        + criarCupom(cupom: CupomDesconto): void
+        + validarCupom(codigo: String): CupomDesconto
+        + desativarCupom(codigo: String): void
+        + listarCuponsAtivos(): List<CupomDesconto>
+    }
+
+    interface ICarrinhoService <<Interface>> {
+        + adicionarItem(clienteId: int, produtoId: int, quantidade: int): void
+        + removerItem(itemId: int): void
+        + atualizarQuantidade(itemId: int, quantidade: int): void
+        + calcularTotal(carrinhoId: int, cupom: String): double
+        + finalizarCompra(carrinhoId: int, dadosPagamento: Pagamento): Venda
+    }
+
+    class ProdutoService <<Service>> implements IProdutoService {
+        - produtoDAO: IProdutoDAO
+        + cadastrarProduto(produto: Produto, imagens: List<ImagemProduto>): void
+        + editarProduto(produto: Produto): void
+        + removerProduto(id: int): void
+        + buscarProduto(id: int): Produto
+        + listarProdutos(): List<Produto>
+        + listarPorCategoria(categoriaId: int): List<Produto>
+        + adicionarImagem(produtoId: int, imagem: ImagemProduto): void
+        + removerImagem(imagemId: int): void
+    }
+
+    class CategoriaService <<Service>> implements ICategoriaService {
+        - categoriaDAO: ICategoriaDAO
+        + cadastrarCategoria(categoria: Categoria): void
+        + editarCategoria(categoria: Categoria): void
+        + removerCategoria(id: int): void
+        + buscarCategoria(id: int): Categoria
+        + listarCategorias(): List<Categoria>
+    }
+
+    class ClienteService <<Service>> implements IClienteService {
+        - clienteDAO: IClienteDAO
+        + cadastrarCliente(cliente: Cliente): void
+        + editarCliente(cliente: Cliente): void
+        + buscarCliente(id: int): Cliente
+        + autenticar(email: String, senha: String): Cliente
+        + recuperarSenha(email: String): void
+    }
+
+    class FuncionarioService <<Service>> implements IFuncionarioService {
+        - funcionarioDAO: IFuncionarioDAO
+        + cadastrarFuncionario(funcionario: Funcionario): void
+        + editarFuncionario(funcionario: Funcionario): void
+        + buscarFuncionario(id: int): Funcionario
+        + autenticar(email: String, senha: String): Funcionario
+    }
+
+    class VendaService <<Service>> implements IVendaService {
+        - vendaDAO: IVendaDAO
+        + realizarVenda(venda: Venda, itens: List<ItemVenda>, pagamento: Pagamento): void
+        + cancelarVenda(vendaId: int): void
+        + buscarVenda(id: int): Venda
+        + listarVendas(): List<Venda>
+        + gerarRelatorioVendas(inicio: Date, fim: Date): RelatorioVendas
+        + gerarNotaFiscal(vendaId: int): NotaFiscal
+    }
+
+    class EstoqueService <<Service>> implements IEstoqueService {
+        - estoqueDAO: IEstoqueDAO
+        + atualizarEstoque(produtoId: int, quantidade: int): void
+        + verificarDisponibilidade(produtoId: int, quantidade: int): boolean
+        + listarProdutosComBaixoEstoque(): List<Estoque>
+        + definirLimiteMinimo(produtoId: int, limite: int): void
+    }
+
+    class CupomService <<Service>> implements ICupomService {
+        - cupomDAO: ICupomDAO
+        + criarCupom(cupom: CupomDesconto): void
+        + validarCupom(codigo: String): CupomDesconto
+        + desativarCupom(codigo: String): void
+        + listarCuponsAtivos(): List<CupomDesconto>
+    }
+
+    class CarrinhoService <<Service>> implements ICarrinhoService {
+        - carrinhoDAO: ICarrinhoDAO
+        + adicionarItem(clienteId: int, produtoId: int, quantidade: int): void
+        + removerItem(itemId: int): void
+        + atualizarQuantidade(itemId: int, quantidade: int): void
+        + calcularTotal(carrinhoId: int, cupom: String): double
+        + finalizarCompra(carrinhoId: int, dadosPagamento: Pagamento): Venda
+    }
+}
+
+package "Controller" <<Folder>> {
+    class ProdutoController <<Controller>> {
+        - produtoService: IProdutoService
+        + cadastrar(produto: ProdutoDto, imagens: MultipartFile[]): ResponseEntity<ProdutoDto>
+        + editar(id: int, produto: ProdutoDto): ResponseEntity<ProdutoDto>
+        + remover(id: int): ResponseEntity<Void>
+        + buscar(id: int): ResponseEntity<ProdutoDto>
+        + listar(): ResponseEntity<List<ProdutoDto>>
+        + listarPorCategoria(categoriaId: int): ResponseEntity<List<ProdutoDto>>
+    }
+
+    class CategoriaController <<Controller>> {
+        - categoriaService: ICategoriaService
+        + cadastrar(categoria: CategoriaDto): ResponseEntity<CategoriaDto>
+        + editar(id: int, categoria: CategoriaDto): ResponseEntity<CategoriaDto>
+        + remover(id: int): ResponseEntity<Void>
+        + buscar(id: int): ResponseEntity<CategoriaDto>
+        + listar(): ResponseEntity<List<CategoriaDto>>
+    }
+
+    class ClienteController <<Controller>> {
+        - clienteService: IClienteService
+        + cadastrar(cliente: ClienteDto): ResponseEntity<ClienteDto>
+        + editar(id: int, cliente: ClienteDto): ResponseEntity<ClienteDto>
+        + buscar(id: int): ResponseEntity<ClienteDto>
+        + autenticar(credenciais: LoginDto): ResponseEntity<TokenDto>
+        + recuperarSenha(email: String): ResponseEntity<Void>
+    }
+
+    class FuncionarioController <<Controller>> {
+        - funcionarioService: IFuncionarioService
+        + cadastrar(funcionario: FuncionarioDto): ResponseEntity<FuncionarioDto>
+        + editar(id: int, funcionario: FuncionarioDto): ResponseEntity<FuncionarioDto>
+        + buscar(id: int): ResponseEntity<FuncionarioDto>
+        + autenticar(credenciais: LoginDto): ResponseEntity<TokenDto>
+    }
+
+    class VendaController <<Controller>> {
+        - vendaService: IVendaService
+        + realizarVenda(venda: VendaDto): ResponseEntity<VendaDto>
+        + cancelarVenda(id: int): ResponseEntity<Void>
+        + buscar(id: int): ResponseEntity<VendaDto>
+        + listar(): ResponseEntity<List<VendaDto>>
+        + relatorioVendas(inicio: String, fim: String): ResponseEntity<RelatorioVendasDto>
+        + emitirNotaFiscal(id: int): ResponseEntity<NotaFiscalDto>
+    }
+
+    class CarrinhoController <<Controller>> {
+        - carrinhoService: ICarrinhoService
+        + adicionarItem(item: ItemCarrinhoDto): ResponseEntity<CarrinhoDto>
+        + removerItem(id: int): ResponseEntity<Void>
+        + atualizarQuantidade(id: int, quantidade: int): ResponseEntity<ItemCarrinhoDto>
+        + calcularTotal(cupom: String): ResponseEntity<TotalCarrinhoDto>
+        + finalizarCompra(dadosPagamento: PagamentoDto): ResponseEntity<VendaDto>
+    }
+}
+
+' Relacionamentos entre entidades
+Produto "1" *-- "1" Categoria
+Produto "1" *-- "*" ImagemProduto
+Produto "1" -- "1" Estoque
+Cliente "1" *-- "*" Venda
+Cliente "1" *-- "*" Endereco
+Cliente "1" -- "1" Carrinho
+Venda "1" *-- "*" ItemVenda
+Venda "1" -- "1" Pagamento
+Venda "1" -- "1" Cliente
+ItemVenda "1" -- "1" Produto
+Carrinho "1" *-- "*" ItemCarrinho
+ItemCarrinho "1" -- "1" Produto
+Funcionario "1" -- "1" CargoFuncionario
+CupomDesconto "1" -- "1" TipoDesconto
+
+' Implementações DAO
+IProdutoDAO <|.. ProdutoDAO
+ICategoriaDAO <|.. CategoriaDAO
+IClienteDAO <|.. ClienteDAO
+IFuncionarioDAO <|.. FuncionarioDAO
+IVendaDAO <|.. VendaDAO
+IEstoqueDAO <|.. EstoqueDAO
+ICupomDAO <|.. CupomDAO
+ICarrinhoDAO <|.. CarrinhoDAO
+
+' Implementações Service
+IProdutoService <|.. ProdutoService
+ICategoriaService <|.. CategoriaService
+IClienteService <|.. ClienteService
+IFuncionarioService <|.. FuncionarioService
+IVendaService <|.. VendaService
+IEstoqueService <|.. EstoqueService
+ICupomService <|.. CupomService
+ICarrinhoService <|.. CarrinhoService
+
+' Dependências Controller -> Service
+ProdutoController --> IProdutoService
+CategoriaController --> ICategoriaService
+ClienteController --> IClienteService
+FuncionarioController --> IFuncionarioService
+VendaController --> IVendaService
+CarrinhoController --> ICarrinhoService
+
+' Dependências Service -> DAO
+ProdutoService --> IProdutoDAO
+CategoriaService --> ICategoriaDAO
+ClienteService --> IClienteDAO
+FuncionarioService --> IFuncionarioDAO
+VendaService --> IVendaDAO
+EstoqueService --> IEstoqueDAO
+CupomService --> ICupomDAO
+CarrinhoService --> ICarrinhoDAO
+
+' Dependências DAO -> Model
+ProdutoDAO --> Produto
+CategoriaDAO --> Categoria
+ClienteDAO --> Cliente
+FuncionarioDAO --> Funcionario
+VendaDAO --> Venda
+EstoqueDAO --> Estoque
+CupomDAO --> CupomDesconto
+CarrinhoDAO --> Carrinho
+
+@enduml
