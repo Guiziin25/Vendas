@@ -10,8 +10,8 @@ public class Client {
 
     public Client(Long id, String password, String name, String email, String phone, String address) {
         this.id = id;
-        setPassword(password);
         setName(name);
+        setPassword(password);
         setEmail(email);
         setPhone(phone);
         setAddress(address);
@@ -25,17 +25,6 @@ public class Client {
         this.id = id;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        //Validação se senha não é vazia e se tem no mínimo 8 caracteres
-        if (password != null && password.trim().length() >= 8) {
-            this.password = password.trim();
-        }
-    }
-
     public String getName() {
         return name;
     }
@@ -44,6 +33,17 @@ public class Client {
         //Validação se nome não é vazio ou incompleto
         if (name != null && name.trim().contains(" ")) {
             this.name = name.trim();
+        }
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        //Validação se senha não é vazia e se tem no mínimo 8 caracteres
+        if (password != null && password.trim().length() >= 8) {
+            this.password = password.trim();
         }
     }
 
