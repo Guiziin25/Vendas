@@ -266,31 +266,19 @@ public class Main {
                 new Date(System.currentTimeMillis() + 86400000 * 7),
                 "Fatura teste");
 
+        // Emitir fatura
         controladorFatura.emitirFatura(fatura);
+        System.out.println("Fatura emitida: " + fatura);
 
-        // Processar pagamento (simulado)
-        IPagamento pagamento = new IPagamento() {
-            @Override
-            public boolean processarPagamento(double valor) {
-                System.out.println("Processando pagamento de R$" + valor);
-                return true;
-            }
+        // Processar pagamento de fatura
+        Pagamento pagamento = new Pagamento("credito", 1, 1000.0, "Cartão");
 
-            @Override
-            public String gerarComprovante() {
-                return "Comprovante de pagamento simulado";
-            }
-
-            @Override
-            public String getStatus() {
-                return "Aprovado";
-            }
-        };
-
-        boolean sucesso = controladorPagamento.processarPagamento(
-                pagamento, fatura, "Cartão de Crédito");
-
-        System.out.println("Pagamento processado com sucesso? " + sucesso);
-        System.out.println("Status da fatura: " + fatura.getStatus());
+        if (pagamento.pagarFatura(fatura)) {
+            System.out.println("Pagamento realizado e fatura atualizada!");
+            System.out.println(pagamento.gerarComprovante());
+            System.out.println("Status da fatura: " + fatura.getStatus());
+        } else {
+            System.out.println("Falha ao pagar fatura: " + pagamento.getStatus());
+        }
     }
 }
