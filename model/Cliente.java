@@ -18,6 +18,17 @@ public class Cliente {
         this.telefone = telefone;
     }
 
+    // Token de Recuperação de Senha
+    private String tokenRecuperacao;
+
+    public String getTokenRecuperacao() {
+        return tokenRecuperacao;
+    }
+
+    public void setTokenRecuperacao(String tokenRecuperacao) {
+        this.tokenRecuperacao = tokenRecuperacao;
+    }
+
     // Getters e Setters
     public int getId() {
         return id;

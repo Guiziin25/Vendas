@@ -53,6 +53,17 @@ public abstract class Funcionario implements IPagamento {
         return comprovante;
     }
 
+    // Token de Recuperação de Senha
+    private String tokenRecuperacao;
+
+    public String getTokenRecuperacao() {
+        return tokenRecuperacao;
+    }
+
+    public void setTokenRecuperacao(String tokenRecuperacao) {
+        this.tokenRecuperacao = tokenRecuperacao;
+    }
+
     @Override
     public String getStatus() {
         return "Ativo";

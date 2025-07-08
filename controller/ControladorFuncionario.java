@@ -134,4 +134,60 @@ public class ControladorFuncionario {
         System.out.println("Tipo de funcionário não reconhecido");
         return 0.0;
     }
+
+    //Buscar Funcionario por email
+    public Funcionario buscarFuncionarioPorEmail(String email) {
+        Funcionario[] funcionarios = repFuncionario.listarTodos();
+        for (Funcionario funcionario : funcionarios) {
+            if (funcionario.getEmail().equalsIgnoreCase(email)) {
+                return funcionario;
+            }
+        }
+        return null; // Retorna null se não encontrar
+    }
+
+    //Buscar Funcionario por token
+    public Funcionario buscarFuncionarioPorToken(String token) {
+        Funcionario[] funcionarios = repFuncionario.listarTodos();
+        for (Funcionario funcionario : funcionarios) {
+            if (token.equals(funcionario.getTokenRecuperacao())) {
+                return funcionario;
+            }
+        }
+        return null; // Retorna null se não encontrar
+    }
+
+    //Método para solicitar recuperação de senha
+    private String gerarTokenRecuperacao() {
+        return java.util.UUID.randomUUID().toString();
+    }
+
+    public boolean solicitarRecuperacaoSenha(String email) {
+        Funcionario funcionario = buscarFuncionarioPorEmail(email); // pode ser Cliente ou Funcionario
+        if (funcionario == null) {
+            System.out.println("E-mail não encontrado!");
+            return false;
+        }
+        String token = gerarTokenRecuperacao(); // gere um token seguro
+        funcionario.setTokenRecuperacao(token);
+        enviarEmailRecuperacao(email, token); // envie o e-mail com o link
+        return true;
+    }
+
+    // Exemplo de método para redefinir senha
+    public boolean redefinirSenha(String token, String novaSenha) {
+        Funcionario funcionario = buscarFuncionarioPorToken(token);
+        if (funcionario == null) {
+            System.out.println("Token inválido ou expirado!");
+            return false;
+        }
+        funcionario.setSenha(novaSenha);
+        funcionario.setTokenRecuperacao(null); // invalida o token
+        return true;
+    }
+
+    private void enviarEmailRecuperacao(String email, String token) {
+        // Aqui você implementaria a lógica para enviar o e-mail com o link de recuperação
+        System.out.println("E-mail enviado para " + email + " com o token: " + token);
+    }
 }

@@ -26,6 +26,9 @@ public class Main {
 
         // Teste do Controlador de Fatura e Pagamento
         testarControladorFaturaEPagamento();
+
+        // Teste de Recuperação de Senha
+        testarRecuperacaoSenha();
     }
 
     private static void testarControladorAcesso() {
@@ -280,5 +283,26 @@ public class Main {
         } else {
             System.out.println("Falha ao pagar fatura: " + pagamento.getStatus());
         }
+    }
+
+    private static void testarRecuperacaoSenha() {
+        System.out.println("\n=== TESTE RECUPERAÇÃO DE SENHA ===");
+        ControladorFuncionario controlador = ControladorFuncionario.getInstancia();
+
+        // 1. Solicite recuperação de senha
+        controlador.solicitarRecuperacaoSenha("carlos@empresa.com");
+
+        // 2. Pegue o token gerado
+        Funcionario funcComToken = controlador.buscarFuncionarioPorEmail("carlos@empresa.com");
+        String token = funcComToken.getTokenRecuperacao();
+        System.out.println("Token gerado: " + token);
+
+        // 3. Redefina a senha usando o token
+        boolean redefiniu = controlador.redefinirSenha(token, "novasenha");
+        System.out.println("Senha redefinida? " + redefiniu);
+
+        // 4. Verifique se a senha foi alterada
+        Funcionario verificado = controlador.buscarFuncionarioPorEmail("carlos@empresa.com");
+        System.out.println("Nova senha: " + verificado.getSenha());
     }
 }
