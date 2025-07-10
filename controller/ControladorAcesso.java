@@ -52,27 +52,13 @@ public class ControladorAcesso {
         return false;
     }
 
-    // Método para verificar permissão
-    public boolean temPermissao(int idFuncionario, String permissao) {
-        // Primeiro busca o funcionário pelo ID
-        Funcionario funcionario = repositorioFuncionario.buscarPorId(idFuncionario);
-
-        // Se não encontrou o funcionário, retorna false
-        if (funcionario == null) {
+        public boolean isAdmin(Funcionario funcionario) {
+            for (String permissao : funcionario.getPermissoes()) {
+                if ("ADMIN".equals(permissao)) {
+                    return true;
+                }
+            }
             return false;
         }
 
-        // Pega todas as permissões do funcionário
-        String[] permissoes = funcionario.getPermissoes();
-
-        // Verifica se a permissão está na lista
-        for (int i = 0; i < permissoes.length; i++) {
-            if (permissoes[i].equals(permissao)) {
-                return true; // Tem a permissão!
-            }
-        }
-
-        // Se chegou aqui, não tem a permissão
-        return false;
-    }
 }

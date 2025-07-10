@@ -41,7 +41,7 @@ public class Main {
         Funcionario func1 = new FuncionarioAssalariado(
                 1, "Admin", "111.111.111-11", "admin@empresa.com",
                 "(81) 1111-1111", new Date(), "Gerente", "TI",
-                "admin", "admin123", new String[]{"admin", "gerente"},
+                "admin", "admin123", new String[]{"ADMIN", "gerente"},
                 5000, 1000
         );
 
@@ -56,17 +56,11 @@ public class Main {
         ControladorFuncionario.getInstancia().contratarFuncionario(func1);
         ControladorFuncionario.getInstancia().contratarFuncionario(func2);
 
-        // Testar autenticação
-        System.out.println("Autenticação admin (deve ser true): " +
-                controladorAcesso.autenticar("admin", "admin123"));
-        System.out.println("Autenticação inválida (deve ser false): " +
-                controladorAcesso.autenticar("admin", "senhaerrada"));
-
-        // Testar permissões
-        System.out.println("Permissão admin (deve ser true): " +
-                controladorAcesso.temPermissao(1, "admin"));
-        System.out.println("Permissão inexistente (deve ser false): " +
-                controladorAcesso.temPermissao(2, "admin"));
+        // Teste se é admin
+        boolean ehAdmin = controladorAcesso.isAdmin(func1);
+        System.out.println("Funcionário " + func1.getNome() + " tem permissão de Administrador? " + ehAdmin);
+        boolean ehAdmin2 = controladorAcesso.isAdmin(func2);
+        System.out.println("Funcionário " + func2.getNome() + " tem permissão de Administrador? " + ehAdmin2);
     }
 
     private static void testarControladorCliente() {
