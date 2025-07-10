@@ -38,4 +38,9 @@ public class ControladorCarrinho {
         }
         return total;
     }
+
+    public double calcularFrete() {
+        return 10.0;
+    }
+
 }

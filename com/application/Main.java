@@ -240,10 +240,12 @@ public class Main {
         double total = controladorCarrinho.calcularTotal();
         System.out.println("Total do carrinho: R$" + total);
 
-        // Aplicar cupom
+        // Aplicar cupom e calcular frete
         double totalComDesconto = ControladorPromocoes.getInstancia()
                 .aplicarCupom(total, "CUPOM10");
-        System.out.println("Total com desconto: R$" + totalComDesconto);
+        double frete = controladorCarrinho.calcularFrete();
+        totalComDesconto += frete;
+        System.out.println("Total com desconto e frete: R$" + totalComDesconto);
 
         // Registrar venda
         Venda venda = new Venda(
