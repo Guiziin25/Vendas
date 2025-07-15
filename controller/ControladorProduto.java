@@ -3,6 +3,11 @@ package controller;
 import model.Produto;
 import repository.Interfaces.IRepProduto;
 import repository.RepProduto;
+import exceptions.ProdutoException;
+import exceptions.ProdutoNaoEncontradoException;
+import exceptions.EstoqueInsuficienteException;
+import exceptions.CampoObrigatorioException;
+import exceptions.CategoriaNaoEncontradaException;
 
 public class ControladorProduto {
     private static ControladorProduto instancia;
@@ -19,32 +24,65 @@ public class ControladorProduto {
         return instancia;
     }
 
-    // ---- MÉTODOS BÁSICOS (CRUD) ---- //
-    public boolean cadastrarProduto(Produto produto) {
-        if (produto != null && produto.getPreco() > 0) {
+    public boolean cadastrarProduto(Produto produto) throws ProdutoException {
+        try {
+            if (produto == null) {
+                throw new CampoObrigatorioException("Produto");
+            }
+            validarCamposObrigatorios(produto);
+
+            if (produto.getPreco() <= 0) {
+                throw new ProdutoException("Preço deve ser maior que zero");
+            }
+
             repProduto.adicionar(produto);
             return true;
+        } catch (CampoObrigatorioException e) {
+            throw new ProdutoException(e.getMessage()); // Encapsula em ProdutoException
         }
-        return false;
     }
 
-    public Produto buscarProduto(int id) {
-        return repProduto.buscarPorId(id);
+    public Produto buscarProduto(int id) throws ProdutoNaoEncontradoException {
+        Produto produto = repProduto.buscarPorId(id);
+        if (produto == null) {
+            throw new ProdutoNaoEncontradoException(id);
+        }
+        return produto;
     }
 
     public Produto[] listarTodosProdutos() {
         return repProduto.listarTodos();
     }
 
-    public boolean atualizarProduto(Produto produto) {
-        return produto != null && repProduto.atualizar(produto);
+    public boolean atualizarProduto(Produto produto) throws ProdutoException {
+        try {
+            // Validação de nulidade
+            if (produto == null) {
+                throw new CampoObrigatorioException("Produto");
+            }
+
+            // Validação de campos obrigatórios
+            validarCamposObrigatorios(produto);
+
+            // Tentativa de atualização no repositório
+            if (!repProduto.atualizar(produto)) {
+                throw new ProdutoException("Falha ao atualizar produto");
+            }
+
+            return true;
+        } catch (CampoObrigatorioException e) {
+            // Encapsula a exceção de validação em ProdutoException
+            throw new ProdutoException("Erro de validação: " + e.getMessage());
+        }
     }
 
-    public boolean removerProduto(int id) {
-        return repProduto.remover(id);
+    public boolean removerProduto(int id) throws ProdutoNaoEncontradoException {
+        if (!repProduto.remover(id)) {
+            throw new ProdutoNaoEncontradoException(id);
+        }
+        return true;
     }
 
-    // ---- MÉTODOS DE BUSCA ---- //
     public Produto[] buscarProdutosPorNome(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
             return new Produto[0];
@@ -52,128 +90,61 @@ public class ControladorProduto {
         return repProduto.buscarPorNome(nome);
     }
 
-    public Produto[] buscarProdutosPorCategoria(String categoria) {
-        if (categoria == null || categoria.trim().isEmpty()) {
-            return new Produto[0];
-        }
-        return repProduto.buscarPorCategoria(categoria);
-    }
-
-    public int getQuantidadeProdutos() {
-        return repProduto.getQuantidade();
-    }
-
-    // ---- MÉTODOS DE CATEGORIA ---- //
-    public boolean editarNomeCategoria(String nomeAntigo, String nomeNovo) {
-        if (nomeAntigo == null || nomeNovo == null || nomeNovo.trim().isEmpty()) {
-            return false;
-        }
-
-        Produto[] produtos = repProduto.buscarPorCategoria(nomeAntigo);
-        if (produtos.length == 0) {
-            return false;
-        }
-
-        for (Produto p : produtos) {
-            p.setCategoria(nomeNovo);
-            repProduto.atualizar(p);
-        }
-        return true;
-    }
-
-    public boolean podeRemoverCategoria(String nomeCategoria) {
-        if (nomeCategoria == null || nomeCategoria.trim().isEmpty()) {
-            return false;
-        }
-        return repProduto.buscarPorCategoria(nomeCategoria).length == 0;
-    }
-
-    public String[] listarTodasCategorias() {
-        Produto[] todosProdutos = repProduto.listarTodos();
-        String[] categorias = new String[todosProdutos.length];
-        int count = 0;
-
-        for (Produto p : todosProdutos) {
-            boolean categoriaJaExiste = false;
-            for (int i = 0; i < count; i++) {
-                if (categorias[i].equalsIgnoreCase(p.getCategoria())) {
-                    categoriaJaExiste = true;
-                    break;
-                }
+    public Produto[] buscarProdutosPorCategoria(String categoria) throws CategoriaNaoEncontradaException {
+        try {
+            // Validação de entrada
+            if (categoria == null || categoria.trim().isEmpty()) {
+                throw new CampoObrigatorioException("Categoria");
             }
-            if (!categoriaJaExiste) {
-                categorias[count++] = p.getCategoria();
+
+            // Busca no repositório
+            Produto[] produtos = repProduto.buscarPorCategoria(categoria);
+
+            // Verifica se encontrou resultados
+            if (produtos.length == 0) {
+                throw new CategoriaNaoEncontradaException(categoria);
             }
+
+            return produtos;
+        } catch (CampoObrigatorioException e) {
+            // Converte para CategoriaNaoEncontradaException mantendo a mensagem original
+            throw new CategoriaNaoEncontradaException(e.getMessage());
         }
-
-        String[] resultado = new String[count];
-        System.arraycopy(categorias, 0, resultado, 0, count);
-        return resultado;
     }
 
-    // ---- MÉTODOS DE IMAGENS ---- //
-    public boolean adicionarImagem(int idProduto, String caminhoImagem) {
-        if (caminhoImagem == null || caminhoImagem.trim().isEmpty()) {
-            return false;
+    public boolean registrarVenda(int idProduto, int quantidade)
+            throws ProdutoNaoEncontradoException, EstoqueInsuficienteException {
+        try {
+            if (quantidade <= 0) {
+                // Usando o construtor que recebe ID
+                throw new ProdutoNaoEncontradoException(idProduto);
+            }
+
+            Produto produto = buscarProduto(idProduto);
+            if (produto.getQuantidadeEstoque() < quantidade) {
+                throw new EstoqueInsuficienteException(idProduto, produto.getQuantidadeEstoque());
+            }
+
+            return repProduto.atualizarEstoque(idProduto, -quantidade);
+        } catch (ProdutoException e) {
+            // Agora usando o construtor correto
+            throw new ProdutoNaoEncontradoException(idProduto);
         }
-        return repProduto.adicionarImagemAoProduto(idProduto, caminhoImagem);
     }
 
-    public boolean removerImagem(int idProduto, String caminhoImagem) {
-        if (caminhoImagem == null || caminhoImagem.trim().isEmpty()) {
-            return false;
+    public String verificarEstoque(int idProduto) throws ProdutoNaoEncontradoException {
+        Produto produto = buscarProduto(idProduto);
+        return "Estoque: " + produto.getQuantidadeEstoque() +
+                " | Mínimo: " + produto.getEstoqueMinimo() +
+                (produto.precisaRepor() ? " (ESTOQUE BAIXO!)" : "");
+    }
+
+    private void validarCamposObrigatorios(Produto produto) throws CampoObrigatorioException {
+        if (produto.getNome() == null || produto.getNome().isEmpty()) {
+            throw new CampoObrigatorioException("Nome do produto");
         }
-        return repProduto.removerImagemDoProduto(idProduto, caminhoImagem);
-    }
-
-    public boolean definirImagemPrincipal(int idProduto, String caminhoImagem) {
-        if (caminhoImagem == null || caminhoImagem.trim().isEmpty()) {
-            return false;
-        }
-        return repProduto.definirImagemPrincipal(idProduto, caminhoImagem);
-    }
-
-    public String[] listarImagens(int idProduto) {
-        return repProduto.listarImagensDoProduto(idProduto);
-    }
-
-    public String getImagemPrincipal(int idProduto) {
-        return repProduto.getImagemPrincipalDoProduto(idProduto);
-    }
-
-    // ---- MÉTODOS DE ESTOQUE ---- //
-    public boolean registrarVenda(int idProduto, int quantidade) {
-        if (quantidade <= 0) return false;
-        return repProduto.atualizarEstoque(idProduto, -quantidade);
-    }
-
-    public boolean reporEstoque(int idProduto, int quantidade) {
-        if (quantidade <= 0) return false;
-        return repProduto.atualizarEstoque(idProduto, quantidade);
-    }
-
-    public String verificarEstoque(int idProduto) {
-        Produto p = repProduto.buscarPorId(idProduto);
-        if (p == null) return "Produto não encontrado";
-
-        return "Estoque: " + p.getQuantidadeEstoque() +
-                " | Mínimo: " + p.getEstoqueMinimo() +
-                (p.precisaRepor() ? " (ESTOQUE BAIXO!)" : "");
-    }
-
-    public void emitirAlertasEstoque() {
-        Produto[] produtos = repProduto.listarProdutosComEstoqueBaixo();
-        if (produtos.length == 0) {
-            System.out.println("Nenhum produto com estoque baixo");
-            return;
-        }
-
-        System.out.println("==== ALERTAS DE ESTOQUE ====");
-        for (Produto p : produtos) {
-            System.out.println(
-                    p.getNome() + " - Estoque: " + p.getQuantidadeEstoque() +
-                            " (Mínimo: " + p.getEstoqueMinimo() + ")"
-            );
+        if (produto.getCategoria() == null || produto.getCategoria().isEmpty()) {
+            throw new CampoObrigatorioException("Categoria");
         }
     }
 }

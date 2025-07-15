@@ -3,62 +3,60 @@ package controller;
 import model.Funcionario;
 import repository.Interfaces.IRepFuncionario;
 import repository.RepFuncionario;
+import exceptions.AutenticacaoException;
+import exceptions.LoginInvalidoException;
+import exceptions.AcessoNegadoException;
 
 public class ControladorAcesso {
-
-    // 1. Parte do Singleton - a gente guarda a única instância aqui
     private static ControladorAcesso instanciaUnica;
-
-    // 2. O repositório que vamos usar (pela interface)
     private IRepFuncionario repositorioFuncionario;
 
-    // 3. Construtor privado - só a própria classe pode criar uma instância
     private ControladorAcesso() {
-        // Aqui a gente pega a instância do repositório de funcionários
         this.repositorioFuncionario = RepFuncionario.getInstancia();
     }
 
-    // 4. Método para pegar a instância (Singleton)
     public static ControladorAcesso getInstancia() {
-        // Se não existir ainda, cria uma nova
         if (instanciaUnica == null) {
             instanciaUnica = new ControladorAcesso();
         }
         return instanciaUnica;
     }
 
-    // Método para verificar login e senha
-    public boolean autenticar(String login, String senha) {
-        // Primeiro verifica se não são nulos
-        if (login == null || senha == null) {
-            return false;
+    public boolean autenticar(String login, String senha) throws AutenticacaoException {
+        if (login == null || login.isEmpty() || senha == null || senha.isEmpty()) {
+            throw new LoginInvalidoException("Login e senha são obrigatórios");
         }
 
-        // Pega todos os funcionários do repositório
         Funcionario[] todosFuncionarios = repositorioFuncionario.listarTodos();
 
-        // Vai um por um pra ver se acha o login e senha
-        for (int i = 0; i < todosFuncionarios.length; i++) {
-            Funcionario func = todosFuncionarios[i];
-
-            // Verifica se o login e senha batem
-            if (func.getLogin() != null && func.getLogin().equals(login) &&
-                    func.getSenha() != null && func.getSenha().equals(senha)) {
-                return true; // Achou!
+        for (Funcionario func : todosFuncionarios) {
+            if (func != null && login.equals(func.getLogin()) && senha.equals(func.getSenha())) {
+                return true;
             }
         }
 
-        // Se chegou aqui, não encontrou
-        return false;
+        throw new LoginInvalidoException("Credenciais inválidas");
     }
 
-        public boolean isAdmin(Funcionario funcionario) {
-            for (String permissao : funcionario.getPermissoes()) {
-                if ("ADMIN".equals(permissao)) {
-                    return true;
-                }
-            }
-            return false;
+    public boolean isAdmin(Funcionario funcionario) throws AcessoNegadoException {
+        // Verificação mais completa do parâmetro
+        if (funcionario == null) {
+            throw new AcessoNegadoException("O objeto Funcionário não pode ser nulo");
         }
 
+        // Verificação mais completa das permissões
+        String[] permissoes = funcionario.getPermissoes();
+        if (permissoes == null || permissoes.length == 0) {
+            throw new AcessoNegadoException("O funcionário não possui nenhuma permissão definida");
+        }
+
+        // Busca case-insensitive pela permissão ADMIN
+        for (String permissao : permissoes) {
+            if (permissao != null && "ADMIN".equalsIgnoreCase(permissao.trim())) {
+                return true;
+            }
+        }
+
+        throw new AcessoNegadoException("Acesso restrito - requer permissão de ADMIN");
+    }
 }

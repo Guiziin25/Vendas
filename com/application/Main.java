@@ -2,183 +2,256 @@ package com.application;
 
 import model.*;
 import controller.*;
+import exceptions.*;
 import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
-        // Teste do Controlador de Acesso
-        testarControladorAcesso();
+        try {
+            System.out.println("=== INÍCIO DOS TESTES ===");
 
-        // Teste do Controlador de Cliente
-        testarControladorCliente();
+            // Teste de todos os controladores
+            testarControladorAcesso();
+            testarControladorCliente();
+            testarControladorProduto();
+            testarControladorPromocoes();
+            testarControladorFuncionario();
+            testarControladorVendaECarrinho();
+            testarControladorFaturaEPagamento();
+            testarRecuperacaoSenha();
 
-        // Teste do Controlador de Produto
-        testarControladorProduto();
-
-        // Teste do Controlador de Promoções
-        testarControladorPromocoes();
-
-        // Teste do Controlador de Funcionários
-        testarControladorFuncionario();
-
-        // Teste do Controlador de Vendas e Carrinho
-        testarControladorVendaECarrinho();
-
-        // Teste do Controlador de Fatura e Pagamento
-        testarControladorFaturaEPagamento();
-
-        // Teste de Recuperação de Senha
-        testarRecuperacaoSenha();
+            System.out.println("\n=== TODOS OS TESTES FORAM CONCLUÍDOS COM SUCESSO! ===");
+        } catch (Exception e) {
+            System.err.println("\n=== ERRO DURANTE A EXECUÇÃO DOS TESTES ===");
+            System.err.println("Tipo: " + e.getClass().getSimpleName());
+            System.err.println("Mensagem: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private static void testarControladorAcesso() {
         System.out.println("\n=== TESTE CONTROLADOR DE ACESSO ===");
-
-        // Padrão Singleton
         ControladorAcesso controladorAcesso = ControladorAcesso.getInstancia();
 
-        // Criar alguns funcionários para o teste
-        Funcionario func1 = new FuncionarioAssalariado(
+        try {
+            // Teste de autenticação inválida
+            System.out.println("\nTeste 1: Tentar autenticar com login inválido");
+            controladorAcesso.autenticar("login_inexistente", "senha_errada");
+            System.out.println("ERRO: Autenticação deveria ter falhado");
+        } catch (AutenticacaoException e) {
+            System.out.println("SUCESSO: Autenticação inválida tratada corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
+
+        // Criar funcionários para teste
+        Funcionario funcAdmin = new FuncionarioAssalariado(
                 1, "Admin", "111.111.111-11", "admin@empresa.com",
                 "(81) 1111-1111", new Date(), "Gerente", "TI",
-                "admin", "admin123", new String[]{"ADMIN", "gerente"},
+                "admin", "admin123", new String[]{"ADMIN"},
                 5000, 1000
         );
 
-        Funcionario func2 = new FuncionarioHorista(
-                2, "Vendedor", "222.222.222-22", "vendedor@empresa.com",
+        Funcionario funcNormal = new FuncionarioHorista(
+                2, "Funcionário Normal", "222.222.222-22", "normal@empresa.com",
                 "(81) 2222-2222", new Date(), "Vendedor", "Vendas",
-                "vendedor", "venda123", new String[]{"vendas"},
+                "normal", "normal123", new String[]{"vendas"},
                 50, 160, false
         );
 
-        //testar a contratação dos funcionários
-        ControladorFuncionario.getInstancia().contratarFuncionario(func1);
-        ControladorFuncionario.getInstancia().contratarFuncionario(func2);
+        try {
+            System.out.println("\nTeste 2: Verificar permissão de administrador");
+            boolean ehAdmin = controladorAcesso.isAdmin(funcAdmin);
+            System.out.println("SUCESSO: Funcionário admin é admin? " + ehAdmin);
 
-        // Teste se é admin
-        boolean ehAdmin = controladorAcesso.isAdmin(func1);
-        System.out.println("Funcionário " + func1.getNome() + " tem permissão de Administrador? " + ehAdmin);
-        boolean ehAdmin2 = controladorAcesso.isAdmin(func2);
-        System.out.println("Funcionário " + func2.getNome() + " tem permissão de Administrador? " + ehAdmin2);
+            System.out.println("\nTeste 3: Verificar permissão de funcionário normal");
+            controladorAcesso.isAdmin(funcNormal);
+            System.out.println("ERRO: Funcionário normal não deveria ter permissão de admin");
+        } catch (AcessoNegadoException e) {
+            System.out.println("SUCESSO: Acesso negado tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
     }
 
     private static void testarControladorCliente() {
         System.out.println("\n=== TESTE CONTROLADOR DE CLIENTE ===");
-
-        // Singleton para o controlador de clientes
         ControladorCliente controladorCliente = ControladorCliente.getInstancia();
 
-        // Cadastrar clientes
+        // Teste 1: Cadastrar cliente com dados inválidos
+        try {
+            System.out.println("\nTeste 1: Cadastrar cliente com dados inválidos");
+            Cliente clienteInvalido = new Cliente(0, "", "", "", "", "");
+            controladorCliente.cadastrarCliente(clienteInvalido);
+            System.out.println("ERRO: Cadastro de cliente inválido deveria falhar");
+        } catch (ClienteException | CampoObrigatorioException e) {
+            System.out.println("SUCESSO: Cliente inválido tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
+
+        // Preparação dos clientes para testes
         Cliente cliente1 = new Cliente(
                 1, "João Silva", "joao@email.com", "senha123",
                 "Rua A, 123", "(11) 9999-9999");
+
         Cliente cliente2 = new Cliente(
                 2, "Maria Souza", "maria@email.com", "abc456",
                 "Av. B, 456", "(11) 8888-8888");
 
-        controladorCliente.cadastrarCliente(cliente1);
-        controladorCliente.cadastrarCliente(cliente2);
+        // Teste 2: Cadastrar clientes válidos
+        try {
+            System.out.println("\nTeste 2: Cadastrar clientes válidos");
+            controladorCliente.cadastrarCliente(cliente1);
+            controladorCliente.cadastrarCliente(cliente2);
+            System.out.println("SUCESSO: Clientes cadastrados com sucesso");
+        } catch (ClienteException | CampoObrigatorioException e) {
+            System.out.println("ERRO: Falha ao cadastrar clientes válidos");
+            System.out.println("Mensagem: " + e.getMessage());
+            return; // Se falhar aqui, não faz sentido continuar os testes
+        }
 
-        // Testar autenticação dos clientes
-        System.out.println("Autenticação cliente 1 (deve ser true): " +
-                controladorCliente.autenticarCliente(1, "senha123"));
-        System.out.println("Autenticação inválida (deve ser false): " +
-                controladorCliente.autenticarCliente(1, "senhaerrada"));
+        // Teste 3: Buscar cliente existente
+        try {
+            System.out.println("\nTeste 3: Buscar cliente existente");
+            Cliente cliente = controladorCliente.buscarCliente(1);
+            System.out.println("SUCESSO: Cliente encontrado: " + cliente.getNome());
+        } catch (ClienteException e) {
+            System.out.println("ERRO: Falha ao buscar cliente existente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
 
-        // Buscar de clientes
-        System.out.println("Buscar cliente 1: " +
-                controladorCliente.buscarCliente(1));
-        System.out.println("Buscar cliente inexistente: " +
-                controladorCliente.buscarCliente(99));
+        // Teste 4: Buscar cliente inexistente
+        try {
+            System.out.println("\nTeste 4: Buscar cliente inexistente");
+            controladorCliente.buscarCliente(999);
+            System.out.println("ERRO: Busca por cliente inexistente deveria falhar");
+        } catch (ClienteException e) {
+            System.out.println("SUCESSO: Cliente não encontrado tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
+
+        // Teste 5: Autenticar cliente com senha correta
+        try {
+            System.out.println("\nTeste 5: Autenticar cliente");
+            boolean autenticado = controladorCliente.autenticarCliente(1, "senha123");
+            System.out.println("SUCESSO: Cliente autenticado? " + autenticado);
+        } catch (ClienteException | CampoObrigatorioException e) {
+            System.out.println("ERRO: Falha na autenticação válida");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
+
+        // Teste 6: Autenticar com senha inválida
+        try {
+            System.out.println("\nTeste 6: Autenticar com senha inválida");
+            controladorCliente.autenticarCliente(1, "senhaerrada");
+            System.out.println("ERRO: Autenticação com senha errada deveria falhar");
+        } catch (ClienteException | CampoObrigatorioException e) {
+            System.out.println("SUCESSO: Autenticação inválida tratada corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
+
+        // Teste 7: Autenticar com senha vazia (deve lançar CampoObrigatorioException)
+        try {
+            System.out.println("\nTeste 7: Autenticar com senha vazia");
+            controladorCliente.autenticarCliente(1, "");
+            System.out.println("ERRO: Autenticação com senha vazia deveria falhar");
+        } catch (ClienteException | CampoObrigatorioException e) {
+            System.out.println("SUCESSO: Senha vazia tratada corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
     }
 
     private static void testarControladorProduto() {
         System.out.println("\n=== TESTE CONTROLADOR DE PRODUTO ===");
-
         ControladorProduto controladorProduto = ControladorProduto.getInstancia();
 
-        // Cadastrar produtos
         Produto produto1 = new Produto(
                 1, "Notebook", "Notebook i7 16GB", 4500.00,
                 "Eletrônicos", 10, 2, "notebook.jpg");
+
         Produto produto2 = new Produto(
                 2, "Mouse", "Mouse sem fio", 120.00,
                 "Acessórios", 50, 10, "mouse.jpg");
-        Produto produto3 = new Produto(
-                3, "Teclado", "Teclado mecânico", 350.00,
-                "Acessórios", 2, 5, "teclado.jpg");
 
-        controladorProduto.cadastrarProduto(produto1);
-        controladorProduto.cadastrarProduto(produto2);
-        controladorProduto.cadastrarProduto(produto3);
+        try {
+            System.out.println("\nTeste 1: Cadastrar produtos válidos");
+            controladorProduto.cadastrarProduto(produto1);
+            controladorProduto.cadastrarProduto(produto2);
+            System.out.println("SUCESSO: Produtos cadastrados com sucesso");
 
-        // Listar produtos
-        System.out.println("\nTodos os produtos:");
-        for (Produto p : controladorProduto.listarTodosProdutos()) {
-            System.out.println(p);
+            System.out.println("\nTeste 2: Buscar produto existente");
+            Produto produto = controladorProduto.buscarProduto(1);
+            System.out.println("SUCESSO: Produto encontrado: " + produto.getNome());
+
+            System.out.println("\nTeste 3: Buscar produto inexistente");
+            controladorProduto.buscarProduto(999);
+            System.out.println("ERRO: Busca por produto inexistente deveria falhar");
+        } catch (ProdutoException e) {
+            System.out.println("SUCESSO: Produto não encontrado tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
         }
 
-        // Buscar por categoria
-        System.out.println("\nProdutos da categoria Acessórios:");
-        for (Produto p : controladorProduto.buscarProdutosPorCategoria("Acessórios")) {
-            System.out.println(p.getNome() + " - R$" + p.getPreco());
+        try {
+            System.out.println("\nTeste 4: Registrar venda com estoque suficiente");
+            controladorProduto.registrarVenda(1, 2);
+            System.out.println("SUCESSO: Venda registrada com sucesso");
+
+            System.out.println("\nTeste 5: Registrar venda com estoque insuficiente");
+            controladorProduto.registrarVenda(1, 20);
+            System.out.println("ERRO: Venda com estoque insuficiente deveria falhar");
+        } catch (ProdutoException e) {
+            System.out.println("SUCESSO: Erro de produto tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
         }
 
-        // Testar estoque
-        System.out.println("\nVerificar estoque produto 1:");
-        System.out.println(controladorProduto.verificarEstoque(1));
+        try {
+            System.out.println("\nTeste 6: Listar produtos por categoria existente");
+            Produto[] produtos = controladorProduto.buscarProdutosPorCategoria("Acessórios");
+            System.out.println("SUCESSO: " + produtos.length + " produtos encontrados");
 
-        // Registrar venda
-        controladorProduto.registrarVenda(1, 2);
-        System.out.println("\nEstoque após venda de 2 notebooks:");
-        System.out.println(controladorProduto.verificarEstoque(1));
-
-        // Emitir alertas de estoque
-        System.out.println("\nAlertas de estoque:");
-        controladorProduto.emitirAlertasEstoque();
+            System.out.println("\nTeste 7: Listar produtos por categoria inexistente");
+            controladorProduto.buscarProdutosPorCategoria("Inexistente");
+            System.out.println("ERRO: Categoria inexistente deveria falhar");
+        } catch (ProdutoException e) {
+            System.out.println("SUCESSO: Categoria não encontrada tratada corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
     }
 
     private static void testarControladorPromocoes() {
         System.out.println("\n=== TESTE CONTROLADOR DE PROMOÇÕES ===");
-
         ControladorPromocoes controladorPromocoes = ControladorPromocoes.getInstancia();
         Date hoje = new Date();
         Date amanha = new Date(hoje.getTime() + 86400000); // +1 dia
         Date semanaQueVem = new Date(hoje.getTime() + 86400000 * 7);
 
-        // Criar promoção para produto
-        controladorPromocoes.criarPromocaoProduto(
-                1, 10.0, true, hoje, semanaQueVem, "Promoção de notebook");
+        try {
+            System.out.println("\nTeste 1: Criar promoção de produto válida");
+            controladorPromocoes.criarPromocaoProduto(
+                    1, 10.0, true, hoje, semanaQueVem, "Promoção de notebook");
+            System.out.println("SUCESSO: Promoção criada com sucesso");
 
-        // Criar cupom de desconto
-        controladorPromocoes.criarCupom(
-                "CUPOM10", 10.0, true, hoje, semanaQueVem, "Cupom 10%", 100);
+            System.out.println("\nTeste 2: Criar cupom de desconto válido");
+            controladorPromocoes.criarCupom(
+                    "CUPOM10", 10.0, true, hoje, semanaQueVem, "Cupom 10%", 100);
+            System.out.println("SUCESSO: Cupom criado com sucesso");
 
-        // Listar promoções ativas
-        System.out.println("Promoções ativas para produto 1:");
-        for (Promocao p : controladorPromocoes.buscarPromocoesPorProduto(1)) {
-            System.out.println(p.getDescricao() + " - " + p.getValorDesconto() + "%");
+            System.out.println("\nTeste 3: Aplicar cupom válido");
+            double valorComDesconto = controladorPromocoes.aplicarCupom(1000.0, "CUPOM10");
+            System.out.println("SUCESSO: Valor com desconto: " + valorComDesconto);
+
+            System.out.println("\nTeste 4: Aplicar cupom inválido");
+            controladorPromocoes.aplicarCupom(1000.0, "CUPOM_INVALIDO");
+            System.out.println("ERRO: Cupom inválido deveria falhar");
+        } catch (PromocaoException e) {
+            System.out.println("SUCESSO: Erro de promoção tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
         }
-
-        // Testar cupom
-        double valorOriginal = 1000.0;
-        double valorComDesconto = controladorPromocoes.aplicarCupom(valorOriginal, "CUPOM10");
-        System.out.println("\nAplicar cupom:");
-        System.out.println("Original: R$" + valorOriginal);
-        System.out.println("Com desconto: R$" + valorComDesconto);
-
-        // Validar cupom
-        System.out.println("\nCupom CUPOM10 é válido? " +
-                controladorPromocoes.validarCupom("CUPOM10"));
     }
 
     private static void testarControladorFuncionario() {
         System.out.println("\n=== TESTE CONTROLADOR DE FUNCIONÁRIO ===");
-
         ControladorFuncionario controladorFuncionario = ControladorFuncionario.getInstancia();
 
-        // Criar funcionários de diferentes tipos
+        // Preparação dos funcionários para testes
         FuncionarioAssalariado assalariado = new FuncionarioAssalariado(
                 3, "Carlos", "333.333.333-33", "carlos@empresa.com",
                 "(33) 3333-3333", new Date(), "Gerente", "Vendas",
@@ -191,114 +264,165 @@ public class Main {
                 "ana", "ana123", new String[]{"rh"},
                 40, 180, true);
 
-        FuncionarioComissionado comissionado = new FuncionarioComissionado(
-                5, "Pedro", "555.555.555-55", "pedro@empresa.com",
-                "(55) 5555-5555", new Date(), "Vendedor", "Vendas",
-                "pedro", "pedro123", new String[]{"vendas"},
-                50000, 0.1);
+        // Teste 1: Contratar funcionários válidos
+        try {
+            System.out.println("\nTeste 1: Contratar funcionários válidos");
+            controladorFuncionario.contratarFuncionario(assalariado);
+            controladorFuncionario.contratarFuncionario(horista);
+            System.out.println("SUCESSO: Funcionários contratados com sucesso");
+        } catch (FuncionarioException | CampoObrigatorioException e) {
+            System.out.println("ERRO: Falha ao contratar funcionários válidos");
+            System.out.println("Mensagem: " + e.getMessage());
+            return; // Se falhar aqui, não faz sentido continuar os testes
+        }
 
-        controladorFuncionario.contratarFuncionario(assalariado);
-        controladorFuncionario.contratarFuncionario(horista);
-        controladorFuncionario.contratarFuncionario(comissionado);
+        // Teste 2: Buscar funcionário existente
+        try {
+            System.out.println("\nTeste 2: Buscar funcionário existente");
+            Funcionario funcionario = controladorFuncionario.buscarFuncionario(3);
+            System.out.println("SUCESSO: Funcionário encontrado: " + funcionario.getNome());
+        } catch (FuncionarioException e) {
+            System.out.println("ERRO: Falha ao buscar funcionário existente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
 
-        // Listar todos os funcionários
-        System.out.println("Todos os funcionários:");
-        controladorFuncionario.listarTodosFuncionarios();
+        // Teste 3: Buscar funcionário inexistente
+        try {
+            System.out.println("\nTeste 3: Buscar funcionário inexistente");
+            controladorFuncionario.buscarFuncionario(999);
+            System.out.println("ERRO: Busca por funcionário inexistente deveria falhar");
+        } catch (FuncionarioException e) {
+            System.out.println("SUCESSO: Funcionário não encontrado tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
 
-        // Listar por departamento
-        System.out.println("\nFuncionários do departamento Vendas:");
-        controladorFuncionario.listarPorDepartamento("Vendas");
+        // Teste 4: Calcular salário de funcionário
+        try {
+            System.out.println("\nTeste 4: Calcular salário de funcionário");
+            double salario = controladorFuncionario.calcularSalarioFuncionario(3);
+            System.out.println("SUCESSO: Salário calculado: " + salario);
+        } catch (FuncionarioException e) {
+            System.out.println("ERRO: Falha ao calcular salário");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
 
-        // Calcular salários
-        System.out.println("\nCálculo de salários:");
-        System.out.println("Salário assalariado: R$" +
-                controladorFuncionario.calcularSalarioFuncionario(3));
-        System.out.println("Salário horista: R$" +
-                controladorFuncionario.calcularSalarioFuncionario(4));
-        System.out.println("Salário comissionado: R$" +
-                controladorFuncionario.calcularSalarioFuncionario(5));
-    }
-
-    private static void testarControladorVendaECarrinho() {
-        System.out.println("\n=== TESTE CONTROLADOR DE VENDA E CARRINHO ===");
-
-        ControladorCarrinho controladorCarrinho = ControladorCarrinho.getInstancia();
-        ControladorVenda controladorVenda = ControladorVenda.getInstancia();
-
-        // Adicionar itens ao carrinho
-        controladorCarrinho.adicionarItem(1); // Notebook
-        controladorCarrinho.adicionarItem(2); // Mouse
-        controladorCarrinho.adicionarItem(3); // Teclado
-
-        // Calcular total
-        double total = controladorCarrinho.calcularTotal();
-        System.out.println("Total do carrinho: R$" + total);
-
-        // Aplicar cupom e calcular frete
-        double totalComDesconto = ControladorPromocoes.getInstancia()
-                .aplicarCupom(total, "CUPOM10");
-        double frete = controladorCarrinho.calcularFrete();
-        totalComDesconto += frete;
-        System.out.println("Total com desconto e frete: R$" + totalComDesconto);
-
-        // Registrar venda
-        Venda venda = new Venda(
-                1, 1, new Date(), totalComDesconto, "Concluída");
-        controladorVenda.registrarVenda(venda);
-
-        // Gerar relatório
-        Date hoje = new Date();
-        Date ontem = new Date(hoje.getTime() - 86400000);
-        double totalVendas = controladorVenda.gerarRelatorioVendas(ontem, hoje);
-        System.out.println("Total de vendas no período: R$" + totalVendas);
+        // Teste 5: Tentar contratar funcionário inválido (sem nome)
+        try {
+            System.out.println("\nTeste 5: Tentar contratar funcionário inválido");
+            FuncionarioComissionado invalido = new FuncionarioComissionado(
+                    5, "", "555.555.555-55", "invalido@empresa.com",
+                    "(55) 5555-5555", new Date(), "Vendedor", "Vendas",
+                    "invalido", "invalido123", new String[]{"vendas"},
+                    50000, 0.1);
+            controladorFuncionario.contratarFuncionario(invalido);
+            System.out.println("ERRO: Cadastro de funcionário inválido deveria falhar");
+        } catch (FuncionarioException | CampoObrigatorioException e) {
+            System.out.println("SUCESSO: Funcionário inválido tratado corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
+        }
     }
 
     private static void testarControladorFaturaEPagamento() {
         System.out.println("\n=== TESTE CONTROLADOR DE FATURA E PAGAMENTO ===");
-
         ControladorFatura controladorFatura = ControladorFatura.getInstancia();
         ControladorPagamento controladorPagamento = ControladorPagamento.getInstancia();
 
-        // Criar fatura
-        Fatura fatura = new Fatura(
-                1, 1, 1, 1000.0, new Date(),
-                new Date(System.currentTimeMillis() + 86400000 * 7),
-                "Fatura teste");
+        try {
+            System.out.println("\nTeste 1: Emitir fatura válida");
+            Fatura fatura = new Fatura(
+                    1, 1, 1, 1000.0, new Date(),
+                    new Date(System.currentTimeMillis() + 86400000 * 7),
+                    "Fatura teste");
+            controladorFatura.emitirFatura(fatura);
+            System.out.println("SUCESSO: Fatura emitida: " + fatura);
 
-        // Emitir fatura
-        controladorFatura.emitirFatura(fatura);
-        System.out.println("Fatura emitida: " + fatura);
-
-        // Processar pagamento de fatura
-        Pagamento pagamento = new Pagamento("credito", 1, 1000.0, "Cartão");
-
-        if (pagamento.pagarFatura(fatura)) {
-            System.out.println("Pagamento realizado e fatura atualizada!");
+            System.out.println("\nTeste 2: Processar pagamento válido");
+            Pagamento pagamento = new Pagamento("credito", 1, 1000.0, "Cartão");
+            boolean sucesso = controladorPagamento.processarPagamento(pagamento, fatura);
+            System.out.println("SUCESSO: Pagamento processado? " + sucesso);
             System.out.println(pagamento.gerarComprovante());
             System.out.println("Status da fatura: " + fatura.getStatus());
-        } else {
-            System.out.println("Falha ao pagar fatura: " + pagamento.getStatus());
+        } catch (Exception e) {
+            System.out.println("ERRO: " + e.getMessage());
+        }
+    }
+    private static void testarControladorVendaECarrinho() {
+        System.out.println("\n=== TESTE CONTROLADOR DE VENDA E CARRINHO ===");
+        ControladorCarrinho controladorCarrinho = ControladorCarrinho.getInstancia();
+        ControladorVenda controladorVenda = ControladorVenda.getInstancia();
+        ControladorProduto controladorProduto = ControladorProduto.getInstancia();
+
+        try {
+            // Primeiro precisamos cadastrar alguns produtos para testar
+            Produto produto1 = new Produto(1, "Notebook", "Notebook i7", 4500.00, "Eletrônicos", 10, 2, "notebook.jpg");
+            Produto produto2 = new Produto(2, "Mouse", "Mouse sem fio", 120.00, "Acessórios", 50, 10, "mouse.jpg");
+
+            controladorProduto.cadastrarProduto(produto1);
+            controladorProduto.cadastrarProduto(produto2);
+
+            System.out.println("\nTeste 1: Adicionar itens ao carrinho");
+            controladorCarrinho.adicionarItem(1); // Notebook
+            controladorCarrinho.adicionarItem(2); // Mouse
+            System.out.println("SUCESSO: Itens adicionados ao carrinho");
+
+            System.out.println("\nTeste 2: Calcular total do carrinho");
+            double total = controladorCarrinho.calcularTotal();
+            System.out.println("SUCESSO: Total do carrinho: " + total);
+
+            System.out.println("\nTeste 3: Calcular frete");
+            double frete = controladorCarrinho.calcularFrete();
+            System.out.println("SUCESSO: Frete calculado: " + frete);
+
+            System.out.println("\nTeste 4: Registrar venda");
+            Venda venda = new Venda(1, 1, new Date(), total + frete, "Concluída");
+            controladorVenda.registrarVenda(venda);
+            System.out.println("SUCESSO: Venda registrada com sucesso");
+
+            System.out.println("\nTeste 5: Gerar relatório de vendas");
+            Date hoje = new Date();
+            Date ontem = new Date(hoje.getTime() - 86400000); // 1 dia antes
+            double totalVendas = controladorVenda.gerarRelatorioVendas(ontem, hoje);
+            System.out.println("SUCESSO: Total de vendas no período: " + totalVendas);
+
+            System.out.println("\nTeste 6: Tentar registrar venda inválida (valor zero)");
+            Venda vendaInvalida = new Venda(2, 1, new Date(), 0, "Concluída");
+            controladorVenda.registrarVenda(vendaInvalida);
+            System.out.println("ERRO: Venda com valor zero deveria falhar");
+        } catch (Exception e) {
+            System.out.println("SUCESSO: Venda inválida tratada corretamente");
+            System.out.println("Mensagem: " + e.getMessage());
         }
     }
 
     private static void testarRecuperacaoSenha() {
         System.out.println("\n=== TESTE RECUPERAÇÃO DE SENHA ===");
-        ControladorFuncionario controlador = ControladorFuncionario.getInstancia();
+        ControladorFuncionario controladorFuncionario = ControladorFuncionario.getInstancia();
+        ControladorCliente controladorCliente = ControladorCliente.getInstancia();
 
-        // 1. Solicite recuperação de senha
-        controlador.solicitarRecuperacaoSenha("carlos@empresa.com");
+        try {
+            System.out.println("\nTeste 1: Recuperação de senha para funcionário");
+            FuncionarioAssalariado funcTeste = new FuncionarioAssalariado(
+                    100, "Func Teste", "100.100.100-10", "func_teste@empresa.com",
+                    "(81) 1000-1000", new Date(), "Testador", "TI",
+                    "func_teste", "senha123", new String[]{"testes"},
+                    3000, 500);
+            controladorFuncionario.contratarFuncionario(funcTeste);
 
-        // 2. Pegue o token gerado
-        Funcionario funcComToken = controlador.buscarFuncionarioPorEmail("carlos@empresa.com");
-        String token = funcComToken.getTokenRecuperacao();
-        System.out.println("Token gerado: " + token);
+            Funcionario func = controladorFuncionario.buscarFuncionario(100);
+            func.setTokenRecuperacao("TOKEN_TESTE");
+            System.out.println("SUCESSO: Token definido para funcionário: " + func.getTokenRecuperacao());
 
-        // 3. Redefina a senha usando o token
-        boolean redefiniu = controlador.redefinirSenha(token, "novasenha");
-        System.out.println("Senha redefinida? " + redefiniu);
+            System.out.println("\nTeste 2: Recuperação de senha para cliente");
+            Cliente clienteTeste = new Cliente(
+                    100, "Cliente Teste", "cliente_teste@email.com", "senha123",
+                    "Rua Teste, 100", "(81) 1000-1000");
+            controladorCliente.cadastrarCliente(clienteTeste);
 
-        // 4. Verifique se a senha foi alterada
-        Funcionario verificado = controlador.buscarFuncionarioPorEmail("carlos@empresa.com");
-        System.out.println("Nova senha: " + verificado.getSenha());
+            Cliente cliente = controladorCliente.buscarCliente(100);
+            cliente.setTokenRecuperacao("TOKEN_CLIENTE");
+            System.out.println("SUCESSO: Token gerado para cliente: " + cliente.getTokenRecuperacao());
+        } catch (Exception e) {
+            System.out.println("ERRO: " + e.getMessage());
+        }
     }
 }

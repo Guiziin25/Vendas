@@ -1,4 +1,4 @@
-package repository.interfaces;
+package repository.Interfaces;
 
 import model.Pagamento;
 
