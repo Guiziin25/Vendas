@@ -216,4 +216,18 @@ public class ControladorPromocoes {
             throw new SistemaException("Erro ao listar promoções: " + e.getMessage());
         }
     }
+
+    public double verificarDescontoProduto(int idProduto) throws PromocaoException {
+        Promocao[] promocoes = repPromocao.buscarPorProduto(idProduto);
+        double maiorDesconto = 0.0;
+
+        if (promocoes != null && promocoes.length > 0) {
+            for (Promocao promocao : promocoes) {
+                if (promocao.estaAtiva() && promocao.getValorDesconto() > maiorDesconto) {
+                    maiorDesconto = promocao.getValorDesconto();
+                }
+            }
+        }
+        return maiorDesconto;
+    }
 }

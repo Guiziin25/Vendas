@@ -38,15 +38,31 @@ public class ControladorCliente {
                 throw new DadosInvalidosException("Cliente não pode ser nulo");
             }
 
-            // Verifica campos obrigatórios
+            // Validações adicionais
+            if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
+                throw new DadosInvalidosException("Nome é obrigatório");
+            }
+
             if (cliente.getEmail() == null || cliente.getEmail().trim().isEmpty()) {
                 throw new DadosInvalidosException("E-mail é obrigatório");
             }
 
+            if (!cliente.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                throw new DadosInvalidosException("E-mail inválido");
+            }
+
+            if (cliente.getSenha() == null || cliente.getSenha().trim().isEmpty()) {
+                throw new DadosInvalidosException("Senha é obrigatória");
+            }
+
             // Verifica se cliente já existe
-            Cliente existente = buscarClientePorEmail(cliente.getEmail());
-            if (existente != null) {
-                throw new ClienteJaCadastradoException(cliente.getEmail());
+            try {
+                Cliente existente = buscarClientePorEmail(cliente.getEmail());
+                if (existente != null) {
+                    throw new ClienteJaCadastradoException(cliente.getEmail());
+                }
+            } catch (ClienteNaoEncontradoException e) {
+                // Cliente não existe, pode cadastrar
             }
 
             repCliente.adicionar(cliente);
@@ -56,14 +72,13 @@ public class ControladorCliente {
             throw new SistemaException("Erro ao cadastrar cliente: " + e.getMessage());
         }
     }
-
     /**
      * Autentica um cliente por ID e senha
      * @param id ID do cliente
      * @param senha Senha do cliente
      * @return Cliente autenticado
      * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
-     * @throws DadosInvalidosException Se a senha for inválida
+     * @throws DadosInvalidosException Se a senha for inválida ou vazia
      * @throws SistemaException Se ocorrer um erro no sistema
      */
     public Cliente autenticarCliente(int id, String senha)
@@ -89,7 +104,6 @@ public class ControladorCliente {
             throw new SistemaException("Erro ao autenticar cliente: " + e.getMessage());
         }
     }
-
     /**
      * Busca um cliente por ID
      * @param id ID do cliente

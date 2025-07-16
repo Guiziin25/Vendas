@@ -48,6 +48,11 @@ public class ControladorAcesso {
             // Pega todos os funcionários do repositório
             Funcionario[] todosFuncionarios = repositorioFuncionario.listarTodos();
 
+            // Verifica se existem funcionários cadastrados
+            if (todosFuncionarios == null || todosFuncionarios.length == 0) {
+                throw new LoginInvalidoException("Nenhum funcionário cadastrado no sistema");
+            }
+
             // Vai um por um pra ver se acha o login e senha
             for (Funcionario func : todosFuncionarios) {
                 // Verifica se o login e senha batem
@@ -60,6 +65,8 @@ public class ControladorAcesso {
             // Se chegou aqui, não encontrou
             throw new LoginInvalidoException("Login ou senha incorretos");
 
+        } catch (LoginInvalidoException e) {
+            throw e; // Re-lança exceções específicas
         } catch (Exception e) {
             throw new SistemaException("Erro ao autenticar: " + e.getMessage());
         }

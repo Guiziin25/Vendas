@@ -17,27 +17,21 @@ public class Pagamento implements IPagamento {
     @Override
     public boolean processarPagamento(double valor) {
         if (valor <= 0) {
-            status = "Valor inválido";
+            this.status = "Valor inválido";
             return false;
         }
-        switch (tipo) {
+
+        switch (this.tipo.toLowerCase()) {
             case "credito":
-                status = "Pago com cartão de crédito";
-                break;
             case "debito":
-                status = "Pago com cartão de débito";
-                break;
             case "pix":
-                status = "Pago com Pix";
-                break;
             case "paypal":
-                status = "Pago via PayPal";
-                break;
+                this.status = "Pago com " + this.tipo;
+                return true;
             default:
-                status = "Método não suportado";
+                this.status = "Método não suportado";
                 return false;
         }
-        return true;
     }
 
     // Pagar uma fatura

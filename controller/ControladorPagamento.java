@@ -35,52 +35,27 @@ public class ControladorPagamento {
      * @throws MetodoPagamentoNaoSuportadoException Se o método de pagamento não for suportado
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public String processarPagamento(Pagamento pagamento, Fatura fatura)
-            throws PagamentoInvalidoException, FaturaNaoEncontradaException,
-            FaturaJaPagaException, FaturaVencidaException, SistemaException {
-        try {
-            if (pagamento == null) {
-                throw new PagamentoInvalidoException("Pagamento não pode ser nulo");
-            }
+    public boolean processarPagamento(Pagamento pagamento, Fatura fatura)
+            throws FaturaJaPagaException, FaturaVencidaException, PagamentoInvalidoException {
 
-            if (fatura == null) {
-                throw new FaturaNaoEncontradaException("Fatura não pode ser nula");
-            }
-
-            Fatura faturaAtualizada = repFatura.buscarPorId(fatura.getId());
-            if (faturaAtualizada == null) {
-                throw new FaturaNaoEncontradaException(fatura.getId());
-            }
-
-            if (!faturaAtualizada.getStatus().equalsIgnoreCase("pendente")) {
-                throw new FaturaJaPagaException(faturaAtualizada.getId());
-            }
-
-            if (faturaAtualizada.estaVencida()) {
-                throw new FaturaVencidaException(faturaAtualizada.getId());
-            }
-
-            boolean sucesso = pagamento.processarPagamento(faturaAtualizada.getValorTotal());
-            if (!sucesso) {
-                throw new PagamentoInvalidoException("Falha no processamento do pagamento");
-            }
-
-            faturaAtualizada.registrarPagamento(
-                    faturaAtualizada.getValorTotal(),
-                    pagamento.getStatus()
-            );
-
-            repFatura.atualizar(faturaAtualizada);
-            repPagamento.adicionar(pagamento);
-
-            return pagamento.gerarComprovante();
-
-        } catch (PagamentoInvalidoException | FaturaNaoEncontradaException |
-                 FaturaJaPagaException | FaturaVencidaException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new SistemaException("Erro ao processar pagamento: " + e.getMessage());
+        // Verifica se a fatura já está paga
+        if (!fatura.getStatus().equalsIgnoreCase("pendente")) {
+            throw new FaturaJaPagaException(fatura.getId());
         }
+
+        // Verifica se a fatura está vencida
+        if (fatura.estaVencida()) {
+            throw new FaturaVencidaException(fatura.getId());
+        }
+
+        // Processa o pagamento
+        boolean pagamentoSucesso = pagamento.processarPagamento(fatura.getValorTotal());
+
+        if (pagamentoSucesso) {
+            fatura.registrarPagamento(fatura.getValorTotal(), pagamento.getStatus());
+        }
+
+        return pagamentoSucesso;
     }
 
     /**
