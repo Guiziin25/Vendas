@@ -1,12 +1,13 @@
 package controller;
 
+import exceptions.ClienteJaCadastradoException;
+import exceptions.ClienteNaoEncontradoException;
+import exceptions.DadosInvalidosException;
+import exceptions.SistemaException;
+import exceptions.TokenInvalidoException;
 import model.Cliente;
 import repository.Interfaces.IRepCliente;
 import repository.RepCliente;
-import exceptions.ClienteException;
-import exceptions.ClienteJaCadastradoException;
-import exceptions.ClienteNaoEncontradoException;
-import exceptions.CampoObrigatorioException;
 
 public class ControladorCliente {
     private static ControladorCliente instancia;
@@ -23,131 +24,216 @@ public class ControladorCliente {
         return instancia;
     }
 
-    public void cadastrarCliente(Cliente cliente) throws ClienteException, CampoObrigatorioException {
-        if (cliente == null) {
-            throw new CampoObrigatorioException("Cliente");
-        }
-
-        validarCamposObrigatorios(cliente);
-
-        if (buscarClientePorEmail(cliente.getEmail()) != null) {
-            throw new ClienteJaCadastradoException(cliente.getEmail());
-        }
-
-        repCliente.adicionar(cliente);
-    }
-
-    public boolean autenticarCliente(int id, String senha) throws ClienteException, CampoObrigatorioException {
-        if (senha == null || senha.isEmpty()) {
-            throw new CampoObrigatorioException("Senha");
-        }
-
-        Cliente cliente = buscarCliente(id);
-        return cliente.getSenha().equals(senha);
-    }
-
-    public Cliente buscarCliente(int id) throws ClienteNaoEncontradoException {
-        Cliente cliente = repCliente.buscarPorId(id);
-        if (cliente == null) {
-            throw new ClienteNaoEncontradoException(id);
-        }
-        return cliente;
-    }
-
-    public String buscarClienteString(int id) throws ClienteNaoEncontradoException {
-        Cliente cliente = buscarCliente(id);
-        return cliente.toString();
-    }
-
-    public Cliente buscarClientePorEmail(String email) {
-        Cliente[] clientes = repCliente.listarTodos();
-        for (Cliente cliente : clientes) {
-            if (cliente != null && email.equalsIgnoreCase(cliente.getEmail())) {
-                return cliente;
+    /**
+     * Cadastra um novo cliente
+     * @param cliente Cliente a ser cadastrado
+     * @throws ClienteJaCadastradoException Se o cliente já estiver cadastrado
+     * @throws DadosInvalidosException Se os dados do cliente forem inválidos
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public void cadastrarCliente(Cliente cliente)
+            throws ClienteJaCadastradoException, DadosInvalidosException, SistemaException {
+        try {
+            if (cliente == null) {
+                throw new DadosInvalidosException("Cliente não pode ser nulo");
             }
+
+            // Verifica campos obrigatórios
+            if (cliente.getEmail() == null || cliente.getEmail().trim().isEmpty()) {
+                throw new DadosInvalidosException("E-mail é obrigatório");
+            }
+
+            // Verifica se cliente já existe
+            Cliente existente = buscarClientePorEmail(cliente.getEmail());
+            if (existente != null) {
+                throw new ClienteJaCadastradoException(cliente.getEmail());
+            }
+
+            repCliente.adicionar(cliente);
+        } catch (ClienteJaCadastradoException | DadosInvalidosException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao cadastrar cliente: " + e.getMessage());
         }
-        return null;
     }
 
-    public Cliente buscarClientePorToken(String token) {
-        Cliente[] clientes = repCliente.listarTodos();
-        for (Cliente cliente : clientes) {
-            if (cliente != null && token.equals(cliente.getTokenRecuperacao())) {
-                return cliente;
+    /**
+     * Autentica um cliente por ID e senha
+     * @param id ID do cliente
+     * @param senha Senha do cliente
+     * @return Cliente autenticado
+     * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
+     * @throws DadosInvalidosException Se a senha for inválida
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public Cliente autenticarCliente(int id, String senha)
+            throws ClienteNaoEncontradoException, DadosInvalidosException, SistemaException {
+        try {
+            if (senha == null || senha.trim().isEmpty()) {
+                throw new DadosInvalidosException("Senha não pode ser vazia");
             }
+
+            Cliente cliente = repCliente.buscarPorId(id);
+            if (cliente == null) {
+                throw new ClienteNaoEncontradoException(id);
+            }
+
+            if (!cliente.getSenha().equals(senha)) {
+                throw new DadosInvalidosException("Senha incorreta");
+            }
+
+            return cliente;
+        } catch (ClienteNaoEncontradoException | DadosInvalidosException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao autenticar cliente: " + e.getMessage());
         }
-        return null;
+    }
+
+    /**
+     * Busca um cliente por ID
+     * @param id ID do cliente
+     * @return Cliente encontrado
+     * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public Cliente buscarCliente(int id) throws ClienteNaoEncontradoException, SistemaException {
+        try {
+            Cliente cliente = repCliente.buscarPorId(id);
+            if (cliente == null) {
+                throw new ClienteNaoEncontradoException(id);
+            }
+            return cliente;
+        } catch (ClienteNaoEncontradoException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao buscar cliente: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Busca cliente por e-mail
+     * @param email E-mail do cliente
+     * @return Cliente encontrado
+     * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
+     * @throws DadosInvalidosException Se o e-mail for inválido
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public Cliente buscarClientePorEmail(String email)
+            throws ClienteNaoEncontradoException, DadosInvalidosException, SistemaException {
+        try {
+            if (email == null || email.trim().isEmpty()) {
+                throw new DadosInvalidosException("E-mail não pode ser vazio");
+            }
+
+            Cliente[] clientes = repCliente.listarTodos();
+            for (Cliente cliente : clientes) {
+                if (email.equalsIgnoreCase(cliente.getEmail())) {
+                    return cliente;
+                }
+            }
+            throw new ClienteNaoEncontradoException("Cliente com e-mail " + email + " não encontrado");
+        } catch (ClienteNaoEncontradoException | DadosInvalidosException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao buscar cliente por e-mail: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Busca cliente por token de recuperação
+     * @param token Token de recuperação
+     * @return Cliente encontrado
+     * @throws TokenInvalidoException Se o token for inválido
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public Cliente buscarClientePorToken(String token) throws TokenInvalidoException, SistemaException {
+        try {
+            if (token == null || token.trim().isEmpty()) {
+                throw new TokenInvalidoException();
+            }
+
+            Cliente[] clientes = repCliente.listarTodos();
+            for (Cliente cliente : clientes) {
+                if (token.equals(cliente.getTokenRecuperacao())) {
+                    return cliente;
+                }
+            }
+            throw new TokenInvalidoException();
+        } catch (TokenInvalidoException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao buscar cliente por token: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Solicita recuperação de senha
+     * @param email E-mail do cliente
+     * @return true se a solicitação foi bem-sucedida
+     * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public boolean solicitarRecuperacaoSenha(String email)
+            throws ClienteNaoEncontradoException, SistemaException {
+        try {
+            Cliente cliente = buscarClientePorEmail(email);
+            String token = gerarTokenRecuperacao();
+            cliente.setTokenRecuperacao(token);
+            enviarEmailRecuperacao(email, token);
+            return true;
+        } catch (ClienteNaoEncontradoException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao solicitar recuperação de senha: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Redefine a senha do cliente
+     * @param token Token de recuperação
+     * @param novaSenha Nova senha
+     * @return true se a redefinição foi bem-sucedida
+     * @throws TokenInvalidoException Se o token for inválido
+     * @throws DadosInvalidosException Se a nova senha for inválida
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public boolean redefinirSenha(String token, String novaSenha)
+            throws TokenInvalidoException, DadosInvalidosException, SistemaException {
+        try {
+            if (novaSenha == null || novaSenha.trim().isEmpty()) {
+                throw new DadosInvalidosException("Nova senha não pode ser vazia");
+            }
+
+            Cliente cliente = buscarClientePorToken(token);
+            cliente.setSenha(novaSenha);
+            cliente.setTokenRecuperacao(null); // Invalida o token
+            return true;
+        } catch (TokenInvalidoException | DadosInvalidosException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao redefinir senha: " + e.getMessage());
+        }
     }
 
     private String gerarTokenRecuperacao() {
         return java.util.UUID.randomUUID().toString();
     }
 
-    public boolean solicitarRecuperacaoSenha(String email)
-            throws ClienteException, CampoObrigatorioException {
-
-        // Validação mais robusta
-        if (email == null) {
-            throw new CampoObrigatorioException("Email não pode ser nulo");
-        }
-        if (email.trim().isEmpty()) {
-            throw new CampoObrigatorioException("Email não pode estar vazio");
-        }
-
-        Cliente cliente = buscarClientePorEmail(email);
-        if (cliente == null) {
-            throw new ClienteNaoEncontradoException("Cliente com email " + email + " não encontrado");
-        }
-
-        String token = gerarTokenRecuperacao();
-        cliente.setTokenRecuperacao(token);
-        enviarEmailRecuperacao(email, token);
-        return true;
-    }
-
-    public boolean redefinirSenha(String token, String novaSenha)
-            throws ClienteException, CampoObrigatorioException {
-
-        // Validações mais robustas
-        if (token == null) {
-            throw new CampoObrigatorioException("Token não pode ser nulo");
-        }
-        if (token.isEmpty()) {
-            throw new CampoObrigatorioException("Token não pode estar vazio");
-        }
-        if (novaSenha == null) {
-            throw new CampoObrigatorioException("Nova senha não pode ser nula");
-        }
-        if (novaSenha.isEmpty()) {
-            throw new CampoObrigatorioException("Nova senha não pode estar vazia");
-        }
-        if (novaSenha.length() < 8) {
-            throw new ClienteException("A senha deve ter pelo menos 8 caracteres");
-        }
-
-        Cliente cliente = buscarClientePorToken(token);
-        if (cliente == null) {
-            throw new ClienteNaoEncontradoException("Token inválido ou expirado");
-        }
-
-        cliente.setSenha(novaSenha);
-        cliente.setTokenRecuperacao(null);
-        return true;
-    }
-
     private void enviarEmailRecuperacao(String email, String token) {
-        System.out.println("E-mail enviado para " + email + " com o token: " + token);
+        // Implementação real enviaria um e-mail de fato
+        System.out.println("E-mail de recuperação enviado para: " + email);
+        System.out.println("Token: " + token);
     }
 
-    private void validarCamposObrigatorios(Cliente cliente) throws CampoObrigatorioException {
-        if (cliente.getNome() == null || cliente.getNome().isEmpty()) {
-            throw new CampoObrigatorioException("Nome");
-        }
-        if (cliente.getEmail() == null || cliente.getEmail().isEmpty()) {
-            throw new CampoObrigatorioException("Email");
-        }
-        if (cliente.getSenha() == null || cliente.getSenha().isEmpty()) {
-            throw new CampoObrigatorioException("Senha");
-        }
+    /**
+     * Obtém um cliente por ID
+     * @param id ID do cliente
+     * @return Cliente encontrado
+     * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
+     * @throws SistemaException Se ocorrer um erro no sistema
+     */
+    public Cliente obterCliente(int id) throws ClienteNaoEncontradoException, SistemaException {
+        return buscarCliente(id);
     }
 }
