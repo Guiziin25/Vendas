@@ -4,8 +4,9 @@ import exceptions.*;
 import model.Produto;
 import repository.Interfaces.IRepProduto;
 import repository.RepProduto;
+import controller.interfaces.IControladorProduto;
 
-public class ControladorProduto {
+public class ControladorProduto implements IControladorProduto {
     private static ControladorProduto instancia;
     private IRepProduto repProduto;
 
@@ -21,7 +22,8 @@ public class ControladorProduto {
     }
 
     // ---- MÉTODOS BÁSICOS (CRUD) ---- //
-    public boolean cadastrarProduto(Produto produto) throws ProdutoException, SistemaException {
+    public boolean cadastrarProduto(Produto produto)
+            throws ProdutoException, SistemaException {
         try {
             if (produto == null) {
                 throw new ProdutoException("Produto não pode ser nulo");
@@ -38,7 +40,8 @@ public class ControladorProduto {
         }
     }
 
-    public Produto buscarProduto(int id) throws ProdutoNaoEncontradoException, SistemaException {
+    public Produto buscarProduto(int id)
+            throws ProdutoNaoEncontradoException, SistemaException {
         try {
             Produto produto = repProduto.buscarPorId(id);
             if (produto == null) {
@@ -82,7 +85,8 @@ public class ControladorProduto {
         }
     }
 
-    public boolean removerProduto(int id) throws ProdutoNaoEncontradoException, SistemaException {
+    public boolean removerProduto(int id)
+            throws ProdutoNaoEncontradoException, SistemaException {
         try {
             boolean resultado = repProduto.remover(id);
             if (!resultado) {
@@ -97,7 +101,8 @@ public class ControladorProduto {
     }
 
     // ---- MÉTODOS DE BUSCA ---- //
-    public Produto[] buscarProdutosPorNome(String nome) throws DadosInvalidosException, SistemaException {
+    public Produto[] buscarProdutosPorNome(String nome)
+            throws DadosInvalidosException, SistemaException {
         try {
             if (nome == null || nome.trim().isEmpty()) {
                 throw new DadosInvalidosException("Nome não pode ser vazio");
@@ -110,7 +115,8 @@ public class ControladorProduto {
         }
     }
 
-    public Produto[] buscarProdutosPorCategoria(String categoria) throws DadosInvalidosException, SistemaException {
+    public Produto[] buscarProdutosPorCategoria(String categoria)
+            throws DadosInvalidosException, SistemaException {
         try {
             if (categoria == null || categoria.trim().isEmpty()) {
                 throw new DadosInvalidosException("Categoria não pode ser vazia");
@@ -132,7 +138,8 @@ public class ControladorProduto {
     }
 
     // ---- MÉTODOS DE CATEGORIA ---- //
-    public boolean editarNomeCategoria(String nomeAntigo, String nomeNovo) throws CategoriaNaoEncontradaException, DadosInvalidosException, SistemaException {
+    public boolean editarNomeCategoria(String nomeAntigo, String nomeNovo)
+            throws CategoriaNaoEncontradaException, DadosInvalidosException, SistemaException {
         try {
             if (nomeAntigo == null || nomeNovo == null || nomeNovo.trim().isEmpty()) {
                 throw new DadosInvalidosException("Nomes não podem ser nulos ou vazios");
@@ -155,7 +162,8 @@ public class ControladorProduto {
         }
     }
 
-    public boolean podeRemoverCategoria(String nomeCategoria) throws DadosInvalidosException, SistemaException {
+    public boolean podeRemoverCategoria(String nomeCategoria)
+            throws DadosInvalidosException, SistemaException {
         try {
             if (nomeCategoria == null || nomeCategoria.trim().isEmpty()) {
                 throw new DadosInvalidosException("Nome da categoria não pode ser vazio");
@@ -196,7 +204,8 @@ public class ControladorProduto {
     }
 
     // ---- MÉTODOS DE IMAGENS ---- //
-    public boolean adicionarImagem(int idProduto, String caminhoImagem) throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
+    public boolean adicionarImagem(int idProduto, String caminhoImagem)
+            throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
         try {
             if (caminhoImagem == null || caminhoImagem.trim().isEmpty()) {
                 throw new DadosInvalidosException("Caminho da imagem não pode ser vazio");
@@ -213,7 +222,8 @@ public class ControladorProduto {
         }
     }
 
-    public boolean removerImagem(int idProduto, String caminhoImagem) throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
+    public boolean removerImagem(int idProduto, String caminhoImagem)
+            throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
         try {
             if (caminhoImagem == null || caminhoImagem.trim().isEmpty()) {
                 throw new DadosInvalidosException("Caminho da imagem não pode ser vazio");
@@ -230,7 +240,8 @@ public class ControladorProduto {
         }
     }
 
-    public boolean definirImagemPrincipal(int idProduto, String caminhoImagem) throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
+    public boolean definirImagemPrincipal(int idProduto, String caminhoImagem)
+            throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
         try {
             if (caminhoImagem == null || caminhoImagem.trim().isEmpty()) {
                 throw new DadosInvalidosException("Caminho da imagem não pode ser vazio");
@@ -247,7 +258,8 @@ public class ControladorProduto {
         }
     }
 
-    public String[] listarImagens(int idProduto) throws ProdutoNaoEncontradoException, SistemaException {
+    public String[] listarImagens(int idProduto)
+            throws ProdutoNaoEncontradoException, SistemaException {
         try {
             String[] imagens = repProduto.listarImagensDoProduto(idProduto);
             if (imagens == null) {
@@ -261,7 +273,8 @@ public class ControladorProduto {
         }
     }
 
-    public String getImagemPrincipal(int idProduto) throws ProdutoNaoEncontradoException, SistemaException {
+    public String getImagemPrincipal(int idProduto)
+            throws ProdutoNaoEncontradoException, SistemaException {
         try {
             String imagem = repProduto.getImagemPrincipalDoProduto(idProduto);
             if (imagem == null) {
@@ -276,7 +289,8 @@ public class ControladorProduto {
     }
 
     // ---- MÉTODOS DE ESTOQUE ---- //
-    public boolean registrarVenda(int idProduto, int quantidade) throws ProdutoNaoEncontradoException, EstoqueInsuficienteException, DadosInvalidosException, SistemaException {
+    public boolean registrarVenda(int idProduto, int quantidade)
+            throws ProdutoNaoEncontradoException, EstoqueInsuficienteException, DadosInvalidosException, SistemaException {
         try {
             if (quantidade <= 0) {
                 throw new DadosInvalidosException("Quantidade deve ser maior que zero");
@@ -299,7 +313,8 @@ public class ControladorProduto {
         }
     }
 
-    public boolean reporEstoque(int idProduto, int quantidade) throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
+    public boolean reporEstoque(int idProduto, int quantidade)
+            throws ProdutoNaoEncontradoException, DadosInvalidosException, SistemaException {
         try {
             if (quantidade <= 0) {
                 throw new DadosInvalidosException("Quantidade deve ser maior que zero");
@@ -318,7 +333,8 @@ public class ControladorProduto {
         }
     }
 
-    public String verificarEstoque(int idProduto) throws ProdutoNaoEncontradoException, SistemaException {
+    public String verificarEstoque(int idProduto)
+            throws ProdutoNaoEncontradoException, SistemaException {
         try {
             Produto p = repProduto.buscarPorId(idProduto);
             if (p == null) {

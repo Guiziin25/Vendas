@@ -5,8 +5,9 @@ import model.Promocao;
 import repository.Interfaces.IRepPromocao;
 import repository.RepPromocao;
 import java.util.Date;
+import controller.interfaces.IControladorPromocoes;
 
-public class ControladorPromocoes {
+public class ControladorPromocoes implements IControladorPromocoes {
     private static ControladorPromocoes instancia;
     private IRepPromocao repPromocao;
 
@@ -144,7 +145,8 @@ public class ControladorPromocoes {
      * @return Array de promoções encontradas
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Promocao[] buscarPromocoesPorProduto(int idProduto) throws SistemaException {
+    public Promocao[] buscarPromocoesPorProduto(int idProduto)
+            throws SistemaException {
         try {
             return repPromocao.buscarPorProduto(idProduto);
         } catch (Exception e) {

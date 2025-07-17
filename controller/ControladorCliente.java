@@ -8,8 +8,9 @@ import exceptions.TokenInvalidoException;
 import model.Cliente;
 import repository.Interfaces.IRepCliente;
 import repository.RepCliente;
+import controller.interfaces.IControladorCliente;
 
-public class ControladorCliente {
+public class ControladorCliente implements IControladorCliente {
     private static ControladorCliente instancia;
     private IRepCliente repCliente;
 
@@ -161,7 +162,8 @@ public class ControladorCliente {
      * @throws TokenInvalidoException Se o token for inválido
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Cliente buscarClientePorToken(String token) throws TokenInvalidoException, SistemaException {
+    public Cliente buscarClientePorToken(String token)
+            throws TokenInvalidoException, SistemaException {
         try {
             if (token == null || token.trim().isEmpty()) {
                 throw new TokenInvalidoException();
@@ -230,11 +232,11 @@ public class ControladorCliente {
         }
     }
 
-    private String gerarTokenRecuperacao() {
+    public String gerarTokenRecuperacao() {
         return java.util.UUID.randomUUID().toString();
     }
 
-    private void enviarEmailRecuperacao(String email, String token) {
+    public void enviarEmailRecuperacao(String email, String token) {
         // Implementação real enviaria um e-mail de fato
         System.out.println("E-mail de recuperação enviado para: " + email);
         System.out.println("Token: " + token);
@@ -247,7 +249,8 @@ public class ControladorCliente {
      * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Cliente obterCliente(int id) throws ClienteNaoEncontradoException, SistemaException {
+    public Cliente obterCliente(int id)
+            throws ClienteNaoEncontradoException, SistemaException {
         return buscarCliente(id);
     }
 }

@@ -5,8 +5,9 @@ import model.Fatura;
 import model.Pagamento;
 import repository.RepFatura;
 import repository.RepPagamento;
+import controller.interfaces.IControladorPagamento;
 
-public class ControladorPagamento {
+public class ControladorPagamento implements IControladorPagamento {
     private static ControladorPagamento instancia;
     private RepFatura repFatura;
     private RepPagamento repPagamento;

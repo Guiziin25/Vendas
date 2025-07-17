@@ -7,8 +7,9 @@ import model.FuncionarioComissionado;
 import model.FuncionarioHorista;
 import repository.Interfaces.IRepFuncionario;
 import repository.RepFuncionario;
+import controller.interfaces.IControladorFuncionario;
 
-public class ControladorFuncionario {
+public class ControladorFuncionario implements IControladorFuncionario {
     private static ControladorFuncionario instancia;
     private IRepFuncionario repFuncionario;
 
@@ -65,7 +66,8 @@ public class ControladorFuncionario {
      * @throws FuncionarioNaoEncontradoException Se o funcionário não for encontrado
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Funcionario buscarFuncionario(int id) throws FuncionarioNaoEncontradoException, SistemaException {
+    public Funcionario buscarFuncionario(int id)
+            throws FuncionarioNaoEncontradoException, SistemaException {
         try {
             Funcionario funcionario = repFuncionario.buscarPorId(id);
             if (funcionario == null) {
@@ -120,7 +122,8 @@ public class ControladorFuncionario {
      * @throws FuncionarioNaoEncontradoException Se o funcionário não for encontrado
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public void demitirFuncionario(int id) throws FuncionarioNaoEncontradoException, SistemaException {
+    public void demitirFuncionario(int id)
+            throws FuncionarioNaoEncontradoException, SistemaException {
         try {
             if (!repFuncionario.remover(id)) {
                 throw new FuncionarioNaoEncontradoException(id);
@@ -138,7 +141,8 @@ public class ControladorFuncionario {
      * @return Array de funcionários do departamento
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Funcionario[] listarPorDepartamento(String departamento) throws SistemaException {
+    public Funcionario[] listarPorDepartamento(String departamento)
+            throws SistemaException {
         try {
             if (departamento == null || departamento.trim().isEmpty()) {
                 throw new SistemaException("Departamento não pode ser vazio");
@@ -217,7 +221,8 @@ public class ControladorFuncionario {
      * @throws TokenInvalidoException Se o token for inválido
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Funcionario buscarFuncionarioPorToken(String token) throws TokenInvalidoException, SistemaException {
+    public Funcionario buscarFuncionarioPorToken(String token)
+            throws TokenInvalidoException, SistemaException {
         try {
             if (token == null || token.trim().isEmpty()) {
                 throw new TokenInvalidoException();
@@ -283,11 +288,11 @@ public class ControladorFuncionario {
         }
     }
 
-    private String gerarTokenRecuperacao() {
+    public String gerarTokenRecuperacao() {
         return java.util.UUID.randomUUID().toString();
     }
 
-    private void enviarEmailRecuperacao(String email, String token) {
+    public void enviarEmailRecuperacao(String email, String token) {
         // Implementação real enviaria um e-mail de fato
         System.out.println("E-mail de recuperação enviado para: " + email);
         System.out.println("Token: " + token);

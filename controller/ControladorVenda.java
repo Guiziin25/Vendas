@@ -5,8 +5,9 @@ import model.Venda;
 import repository.Interfaces.IRepVenda;
 import repository.RepVenda;
 import java.util.Date;
+import controller.interfaces.IControladorVenda;
 
-public class ControladorVenda {
+public class ControladorVenda implements IControladorVenda {
     private static ControladorVenda instancia;
     private IRepVenda repVenda;
 
@@ -63,7 +64,8 @@ public class ControladorVenda {
      * @throws DadosInvalidosException Se as datas forem inválidas
      * @throws SistemaException Se ocorrer um erro ao gerar o relatório
      */
-    public double gerarRelatorioVendas(Date inicio, Date fim) throws DadosInvalidosException, SistemaException {
+    public double gerarRelatorioVendas(Date inicio, Date fim)
+            throws DadosInvalidosException, SistemaException {
         try {
             // Validação das datas
             if (inicio == null || fim == null) {
@@ -97,7 +99,8 @@ public class ControladorVenda {
      * @throws VendaNaoEncontradaException Se a venda não for encontrada
      * @throws SistemaException Se ocorrer um erro na busca
      */
-    public Venda buscarVenda(int id) throws VendaNaoEncontradaException, SistemaException {
+    public Venda buscarVenda(int id)
+            throws VendaNaoEncontradaException, SistemaException {
         try {
             Venda venda = repVenda.buscarPorId(id);
             if (venda == null) {
@@ -118,7 +121,8 @@ public class ControladorVenda {
      * @throws ClienteNaoEncontradoException Se o cliente não tiver vendas registradas
      * @throws SistemaException Se ocorrer um erro na busca
      */
-    public Venda[] listarVendasPorCliente(int idCliente) throws ClienteNaoEncontradoException, SistemaException {
+    public Venda[] listarVendasPorCliente(int idCliente)
+            throws ClienteNaoEncontradoException, SistemaException {
         try {
             Venda[] vendas = repVenda.buscarPorCliente(idCliente);
             if (vendas.length == 0) {

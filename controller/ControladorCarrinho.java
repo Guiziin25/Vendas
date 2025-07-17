@@ -7,8 +7,9 @@ import exceptions.SistemaException;
 import model.Produto;
 import repository.Interfaces.IRepProduto;
 import repository.RepProduto;
+import controller.interfaces.IControladorCarrinho;
 
-public class ControladorCarrinho {
+public class ControladorCarrinho implements IControladorCarrinho {
     private static ControladorCarrinho instancia;
     private IRepProduto repProduto;
     private Produto[] itens;
@@ -30,11 +31,11 @@ public class ControladorCarrinho {
 
     /**
      * Adiciona um item ao carrinho de compras
-     * @param idProduto ID do produto a ser adicionado
+     * @param idProduto  ID do produto a ser adicionado
      * @param quantidade Quantidade do produto a ser adicionada
      * @throws ProdutoNaoEncontradoException Se o produto não for encontrado
-     * @throws EstoqueInsuficienteException Se não houver estoque suficiente
-     * @throws SistemaException Se ocorrer um erro no sistema
+     * @throws EstoqueInsuficienteException  Se não houver estoque suficiente
+     * @throws SistemaException              Se ocorrer um erro no sistema
      */
     public void adicionarItem(int idProduto, int quantidade)
             throws ProdutoNaoEncontradoException, EstoqueInsuficienteException, SistemaException {
@@ -103,10 +104,10 @@ public class ControladorCarrinho {
 
     /**
      * Remove um item do carrinho
-     * @param idProduto ID do produto a ser removido
+     * @param idProduto  ID do produto a ser removido
      * @param quantidade Quantidade a ser removida
      * @throws ProdutoNaoEncontradoException Se o produto não estiver no carrinho
-     * @throws SistemaException Se ocorrer um erro no sistema
+     * @throws SistemaException              Se ocorrer um erro no sistema
      */
     public void removerItem(int idProduto, int quantidade)
             throws ProdutoNaoEncontradoException, SistemaException {
@@ -151,7 +152,7 @@ public class ControladorCarrinho {
     }
 
     /**
-     * Retorna os itens do carrinho
+     * Retorna os itens do carrinho*
      * @return Array de produtos no carrinho
      * @throws CarrinhoVazioException Se o carrinho estiver vazio
      */

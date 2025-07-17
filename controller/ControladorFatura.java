@@ -9,8 +9,9 @@ import exceptions.SistemaException;
 import model.Fatura;
 import repository.Interfaces.IRepFatura;
 import repository.RepFatura;
+import controller.interfaces.IControladorFatura;
 
-public class ControladorFatura {
+public class ControladorFatura implements IControladorFatura {
     private static ControladorFatura instancia;
     private IRepFatura repFatura;
 
@@ -31,7 +32,8 @@ public class ControladorFatura {
      * @throws FaturaException Se a fatura for inválida
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public void emitirFatura(Fatura fatura) throws FaturaException, SistemaException {
+    public void emitirFatura(Fatura fatura)
+            throws FaturaException, SistemaException {
         try {
             if (fatura == null) {
                 throw new FaturaException("Fatura não pode ser nula");
@@ -60,7 +62,8 @@ public class ControladorFatura {
      * @throws FaturaNaoEncontradaException Se a fatura não for encontrada
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Fatura buscarFatura(int id) throws FaturaNaoEncontradaException, SistemaException {
+    public Fatura buscarFatura(int id)
+            throws FaturaNaoEncontradaException, SistemaException {
         try {
             Fatura fatura = repFatura.buscarPorId(id);
             if (fatura == null) {
@@ -123,7 +126,8 @@ public class ControladorFatura {
      * @return Array de faturas do cliente
      * @throws SistemaException Se ocorrer um erro no sistema
      */
-    public Fatura[] listarFaturasPorCliente(int idCliente) throws SistemaException {
+    public Fatura[] listarFaturasPorCliente(int idCliente)
+            throws SistemaException {
         try {
             if (idCliente <= 0) {
                 throw new SistemaException("ID do cliente inválido");

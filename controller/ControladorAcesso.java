@@ -6,8 +6,9 @@ import exceptions.SistemaException;
 import model.Funcionario;
 import repository.Interfaces.IRepFuncionario;
 import repository.RepFuncionario;
+import controller.interfaces.IControladorAcesso;
 
-public class ControladorAcesso {
+public class ControladorAcesso implements IControladorAcesso {
 
     // 1. Parte do Singleton - a gente guarda a única instância aqui
     private static ControladorAcesso instanciaUnica;

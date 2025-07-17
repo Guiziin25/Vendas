@@ -5,8 +5,9 @@ import model.Venda;
 import repository.Interfaces.IRepVenda;
 import repository.RepVenda;
 import java.util.Date;
+import controller.interfaces.IControladorRelatorio;
 
-public class ControladorRelatorio {
+public class ControladorRelatorio implements IControladorRelatorio {
     private static ControladorRelatorio instancia;
     private IRepVenda repVenda;
 
@@ -29,7 +30,8 @@ public class ControladorRelatorio {
      * @throws DadosInvalidosException Se as datas forem inválidas
      * @throws SistemaException Se ocorrer um erro ao gerar o relatório
      */
-    public String gerarRelatorioVendas(Date inicio, Date fim) throws DadosInvalidosException, SistemaException {
+    public String gerarRelatorioVendas(Date inicio, Date fim)
+            throws DadosInvalidosException, SistemaException {
         try {
             // Validação das datas
             if (inicio == null || fim == null) {
@@ -82,7 +84,8 @@ public class ControladorRelatorio {
      * @throws ClienteNaoEncontradoException Se o cliente não for encontrado
      * @throws SistemaException Se ocorrer um erro ao gerar o relatório
      */
-    public String gerarRelatorioVendasPorCliente(int idCliente) throws ClienteNaoEncontradoException, SistemaException {
+    public String gerarRelatorioVendasPorCliente(int idCliente)
+            throws ClienteNaoEncontradoException, SistemaException {
         try {
             Venda[] vendas = repVenda.buscarPorCliente(idCliente);
 
@@ -125,7 +128,8 @@ public class ControladorRelatorio {
      * @throws DadosInvalidosException Se o mês ou ano forem inválidos
      * @throws SistemaException Se ocorrer um erro ao gerar o relatório
      */
-    public String gerarRelatorioMensal(int mes, int ano) throws DadosInvalidosException, SistemaException {
+    public String gerarRelatorioMensal(int mes, int ano)
+            throws DadosInvalidosException, SistemaException {
         try {
             if (mes < 1 || mes > 12) {
                 throw new DadosInvalidosException("Mês inválido (deve ser entre 1 e 12)");
