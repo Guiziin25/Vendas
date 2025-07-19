@@ -148,4 +148,12 @@ public class ControladorVenda implements IControladorVenda {
             throw new SistemaException("Erro ao calcular total de vendas: " + e.getMessage());
         }
     }
+
+    public Venda[] listarVendas() throws SistemaException {
+        try {
+            return repVenda.listarTodos();
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao listar vendas: " + e.getMessage());
+        }
+    }
 }

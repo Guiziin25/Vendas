@@ -297,4 +297,19 @@ public class ControladorFuncionario implements IControladorFuncionario {
         System.out.println("E-mail de recuperação enviado para: " + email);
         System.out.println("Token: " + token);
     }
+
+    public Funcionario autenticarFuncionario(int id, String senha)
+            throws FuncionarioNaoEncontradoException, DadosInvalidosException, SistemaException {
+        Funcionario funcionario = buscarFuncionario(id);
+        if (funcionario == null) {
+            throw new FuncionarioNaoEncontradoException(id);
+        }
+        if (senha == null || senha.trim().isEmpty()) {
+            throw new DadosInvalidosException("Senha não pode ser vazia");
+        }
+        if (!senha.equals(funcionario.getSenha())) {
+            throw new DadosInvalidosException("Senha incorreta");
+        }
+        return funcionario;
+    }
 }

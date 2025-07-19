@@ -14,4 +14,5 @@ public interface IControladorCliente {
     String gerarTokenRecuperacao();
     void enviarEmailRecuperacao(String email, String token);
     Cliente obterCliente(int id) throws ClienteNaoEncontradoException, SistemaException;
+    Cliente[] listarClientes() throws SistemaException;
 }

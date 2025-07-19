@@ -253,4 +253,12 @@ public class ControladorCliente implements IControladorCliente {
             throws ClienteNaoEncontradoException, SistemaException {
         return buscarCliente(id);
     }
+
+    public Cliente[] listarClientes() throws SistemaException {
+        try {
+            return repCliente.listarTodos();
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao listar clientes: " + e.getMessage());
+        }
+    }
 }

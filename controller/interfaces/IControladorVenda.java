@@ -10,4 +10,5 @@ public interface IControladorVenda {
     Venda buscarVenda(int id) throws VendaNaoEncontradaException, SistemaException;
     Venda[] listarVendasPorCliente(int idCliente) throws ClienteNaoEncontradoException, SistemaException;
     double calcularTotalVendas() throws SistemaException;
+    Venda[] listarVendas() throws SistemaException;
 }

@@ -17,4 +17,5 @@ public interface IControladorFuncionario {
     void redefinirSenha(String token, String novaSenha) throws TokenInvalidoException, DadosInvalidosException, SistemaException;
     String gerarTokenRecuperacao();
     void enviarEmailRecuperacao(String email, String token);
+    Funcionario autenticarFuncionario(int id, String senha) throws FuncionarioNaoEncontradoException, DadosInvalidosException, SistemaException;
 }
