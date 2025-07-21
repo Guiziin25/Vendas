@@ -56,7 +56,6 @@ public class ControladorCarrinho implements IControladorCarrinho {
             if (produto.getQuantidadeEstoque() < quantidade) {
                 throw new EstoqueInsuficienteException(idProduto, produto.getQuantidadeEstoque());
             }
-
             // Adiciona o produto ao carrinho (simplificado - na prática deveria agrupar itens iguais)
             for (int i = 0; i < quantidade; i++) {
                 if (quantidadeItens < CAPACIDADE_MAXIMA) {
@@ -164,5 +163,19 @@ public class ControladorCarrinho implements IControladorCarrinho {
         Produto[] lista = new Produto[quantidadeItens];
         System.arraycopy(itens, 0, lista, 0, quantidadeItens);
         return lista;
+    }
+
+    // Java
+    public int getQuantidadePorProduto(int idProduto) throws CarrinhoVazioException {
+        if (quantidadeItens == 0) {
+            throw new CarrinhoVazioException();
+        }
+        int count = 0;
+        for (int i = 0; i < quantidadeItens; i++) {
+            if (itens[i].getId() == idProduto) {
+                count++;
+            }
+        }
+        return count;
     }
 }

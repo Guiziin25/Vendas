@@ -8,14 +8,19 @@ import model.FuncionarioHorista;
 import repository.Interfaces.IRepFuncionario;
 import repository.RepFuncionario;
 import controller.interfaces.IControladorFuncionario;
+import repository.Interfaces.IRepCliente;
+import repository.RepCliente;
+import model.Cliente;
 
 public class ControladorFuncionario implements IControladorFuncionario {
     private static ControladorFuncionario instancia;
     private IRepFuncionario repFuncionario;
+    private IRepCliente repCliente;
 
     // Construtor privado para Singleton
     private ControladorFuncionario() {
         this.repFuncionario = RepFuncionario.getInstancia();
+        this.repCliente = RepCliente.getInstancia();
     }
 
     // Método Singleton para obter a instância
@@ -311,5 +316,21 @@ public class ControladorFuncionario implements IControladorFuncionario {
             throw new DadosInvalidosException("Senha incorreta");
         }
         return funcionario;
+    }
+
+    public boolean removerCliente(int id) throws SistemaException {
+        try {
+            return repCliente.remover(id);
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao remover cliente: " + e.getMessage());
+        }
+    }
+
+    public boolean atualizarCliente(Cliente cliente) throws SistemaException {
+        try {
+            return repCliente.atualizar(cliente);
+        } catch (Exception e) {
+            throw new SistemaException("Erro ao atualizar cliente: " + e.getMessage());
+        }
     }
 }

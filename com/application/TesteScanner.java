@@ -8,7 +8,7 @@ import model.*;
 import controller.*;
 
 
-public class Testes {
+public class TesteScanner {
     public static void main(String[] args) throws SistemaException, DadosInvalidosException {
 
         Scanner scanner = new Scanner(System.in);
@@ -33,6 +33,11 @@ public class Testes {
             controladorFuncionario.contratarFuncionario(
                     new FuncionarioAssalariado(2, "Gonzaga Vendedor", "98765432100", "gonzaga@email.com", "11922222222", new Date(), "Vendedor", "Vendas", "gonzaga", "vendedor", permissoesVendedor, 3000.0, 300.0)
             );
+
+            controladorVenda.registrarVenda(new Venda(1, 1, new Date(), 4620.00, "Concluída"));
+            controladorVenda.registrarVenda(new Venda(2, 2, new Date(), 120.00, "Concluída"));
+            controladorVenda.registrarVenda(new Venda(3, 1, new Date(), 500.00, "Cancelada"));
+
         try {
                 Produto produto1 = new Produto(1, "Notebook", "Notebook i7", 4500.00, "Eletrônicos", 10, 2, "notebook.jpg");
                 Produto produto2 = new Produto(2, "Mouse", "Mouse sem fio", 120.00, "Acessórios", 50, 10, "mouse.jpg");
@@ -73,9 +78,10 @@ public class Testes {
                 while (continuar) {
                     System.out.println("\nMenu Cliente:");
                     System.out.println("1 - Listar produtos");
-                    System.out.println("2 - Adicionar produto ao carrinho");
+                    System.out.println("2 - Adicionar produto do carrinho");
                     System.out.println("3 - Ver carrinho");
-                    System.out.println("4 - Finalizar compra");
+                    System.out.println("4 - Remover produto do carrinho");
+                    System.out.println("5 - Finalizar compra");
                     System.out.println("0 - Sair");
                     System.out.print("Escolha uma opção: ");
                     int opcao = scanner.nextInt();
@@ -115,6 +121,21 @@ public class Testes {
                             }
                             break;
                         case 4:
+                            System.out.print("ID do produto para remover: ");
+                            int idProdutoRemover = scanner.nextInt();
+                            System.out.print("Quantidade a remover: ");
+                            int qtdRemover = scanner.nextInt();
+                            scanner.nextLine();
+                            try {
+                                controladorCarrinho.removerItem(idProdutoRemover, qtdRemover);
+                                System.out.println("Produto removido do carrinho!");
+                            } catch (ProdutoNaoEncontradoException e) {
+                                System.out.println("Produto não encontrado no carrinho.");
+                            } catch (Exception e) {
+                                System.out.println("Erro ao remover produto: " + e.getMessage());
+                            }
+                            break;
+                        case 5:
                             double total = controladorCarrinho.calcularTotal();
                             double frete = controladorCarrinho.calcularFrete();
                             System.out.println("Total: R$" + total);
@@ -183,14 +204,14 @@ public class Testes {
                             Venda[] vendas = controladorVenda.listarVendas();
                             System.out.println("Vendas realizadas:");
                             for (Venda v : vendas) {
-                                System.out.println("Venda #" + v.getId() + " - Cliente: " + v.getIdCliente() + " - Valor: R$" + v.getValorTotal());
+                                System.out.println("Venda #" + v.getId() + " - Cliente: " + v.getIdCliente() + " - Valor: R$" + v.getValorTotal() + " - Status: " + v.getStatus());
                             }
                             break;
                         case 3:
                             Produto[] produtos = controladorProduto.listarTodosProdutos();
                             System.out.println("Produtos disponíveis:");
                             for (Produto p : produtos) {
-                                System.out.println(p.getId() + " - " + p.getNome() + " - R$" + p.getPreco());
+                                System.out.println(p.getId() + " - " + p.getNome() + " - R$" + p.getPreco()+ " | Estoque: " + p.getQuantidadeEstoque());
                             }
                             break;
                         case 4:
@@ -260,6 +281,14 @@ public class Testes {
                     System.out.println("1 - Listar produtos");
                     System.out.println("2 - Adicionar produto");
                     System.out.println("3 - Remover produto");
+                    System.out.println("4 - Editar produto");
+                    System.out.println("5 - Listar categorias");
+                    System.out.println("6 - Editar categoria");
+                    System.out.println("7 - Excluir categoria");
+                    System.out.println("8 - Adicionar cliente");
+                    System.out.println("9 - Remover cliente");
+                    System.out.println("10 - Editar cliente");
+                    System.out.println("11 - Listar clientes");
                     System.out.println("0 - Sair");
                     System.out.print("Escolha uma opção: ");
                     int opcao = scanner.nextInt();
@@ -270,7 +299,7 @@ public class Testes {
                             Produto[] produtos = controladorProduto.listarTodosProdutos();
                             System.out.println("Produtos disponíveis:");
                             for (Produto p : produtos) {
-                                System.out.println(p.getId() + " - " + p.getNome() + " - R$" + p.getPreco());
+                                System.out.println(p.getId() + " - " + p.getNome() + " - R$" + p.getPreco()+ " | Estoque: " + p.getQuantidadeEstoque());
                             }
                             break;
                         case 2:
@@ -301,6 +330,156 @@ public class Testes {
                             scanner.nextLine();
                             controladorProduto.removerProduto(idRemover);
                             System.out.println("Produto removido!");
+                            break;
+                        case 4:
+                            System.out.print("ID do produto para editar: ");
+                            int idEditar = scanner.nextInt();
+                            scanner.nextLine();
+                            Produto produtoEditar = controladorProduto.buscarProduto(idEditar);
+                            if (produtoEditar == null) {
+                                System.out.println("Produto não encontrado.");
+                                break;
+                            }
+                            System.out.print("Novo nome (" + produtoEditar.getNome() + "): ");
+                            String novoNome = scanner.nextLine();
+                            System.out.print("Nova descrição (" + produtoEditar.getDescricao() + "): ");
+                            String novaDescricao = scanner.nextLine();
+                            System.out.print("Novo preço (" + produtoEditar.getPreco() + "): ");
+                            double novoPreco = scanner.nextDouble();
+                            scanner.nextLine();
+                            System.out.print("Nova categoria (" + produtoEditar.getCategoria() + "): ");
+                            String novaCategoria = scanner.nextLine();
+                            System.out.print("Nova quantidade em estoque (" + produtoEditar.getQuantidadeEstoque() + "): ");
+                            int novaQuantidade = scanner.nextInt();
+                            System.out.print("Novo estoque mínimo (" + produtoEditar.getEstoqueMinimo() + "): ");
+                            int novoEstoqueMinimo = scanner.nextInt();
+                            scanner.nextLine();
+                            System.out.print("Nova imagem principal (" + produtoEditar.getImagemPrincipal() + "): ");
+                            String novaImagem = scanner.nextLine();
+
+                            produtoEditar.setNome(novoNome);
+                            produtoEditar.setDescricao(novaDescricao);
+                            produtoEditar.setPreco(novoPreco);
+                            produtoEditar.setCategoria(novaCategoria);
+                            produtoEditar.setQuantidadeEstoque(novaQuantidade);
+                            produtoEditar.setEstoqueMinimo(novoEstoqueMinimo);
+                            produtoEditar.setImagemPrincipal(novaImagem);
+
+                            controladorProduto.atualizarProduto(produtoEditar);
+                            System.out.println("Produto editado com sucesso!");
+                            break;
+                        case 5:
+                            String[] categorias = controladorProduto.listarTodasCategorias();
+                            System.out.println("Categorias cadastradas:");
+                            for (String cat : categorias) {
+                                System.out.println(cat);
+                            }
+                            break;
+                        case 6:
+                            System.out.print("Nome da categoria para editar: ");
+                            String nomeAntigo = scanner.nextLine();
+                            System.out.print("Novo nome da categoria: ");
+                            String nomeNovo = scanner.nextLine();
+                            try {
+                                controladorProduto.editarNomeCategoria(nomeAntigo, nomeNovo);
+                                System.out.println("Categoria editada com sucesso!");
+                            } catch (Exception e) {
+                                System.out.println("Erro ao editar categoria: " + e.getMessage());
+                            }
+                            break;
+                        case 7:
+                            System.out.print("Nome da categoria para excluir: ");
+                            String nomeCatExcluir = scanner.nextLine();
+                            try {
+                                if (controladorProduto.podeRemoverCategoria(nomeCatExcluir)) {
+                                    System.out.println("Categoria excluída!");
+                                } else {
+                                    System.out.println("Não é possível excluir: existem produtos nessa categoria.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Erro ao excluir categoria: " + e.getMessage());
+                            }
+                            break;
+                        case 8:
+                            System.out.print("Nome: ");
+                            String name = scanner.nextLine();
+                            System.out.print("Email: ");
+                            String email = scanner.nextLine();
+                            System.out.print("Senha: ");
+                            String senha = scanner.nextLine();
+                            System.out.print("Endereço: ");
+                            String endereco = scanner.nextLine();
+                            System.out.print("Telefone: ");
+                            String telefone = scanner.nextLine();
+                            int novoId = controladorCliente.listarClientes().length + 1;
+                            Cliente novoCliente = new Cliente(novoId, name, email, senha, endereco, telefone);
+                            try {
+                                controladorCliente.cadastrarCliente(novoCliente);
+                                System.out.println("Cliente cadastrado!");
+                            } catch (Exception e) {
+                                System.out.println("Erro ao cadastrar cliente: " + e.getMessage());
+                            }
+                            break;
+                        case 9:
+                            System.out.print("ID do cliente para remover: ");
+                            int idRemove = scanner.nextInt();
+                            scanner.nextLine();
+                            try {
+                                boolean removido = controladorFuncionario.removerCliente(idRemove);                                if (removido) {
+                                    System.out.println("Cliente removido!");
+                                } else {
+                                    System.out.println("Cliente não encontrado.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Erro ao remover cliente: " + e.getMessage());
+                            }
+                            break;
+                        case 10:
+                            System.out.print("ID do cliente para editar: ");
+                            int idEdita = scanner.nextInt();
+                            scanner.nextLine();
+                            try {
+                                Cliente clienteEditar = controladorCliente.buscarCliente(idEdita);
+                                if (clienteEditar == null) {
+                                    System.out.println("Cliente não encontrado.");
+                                    break;
+                                }
+                                System.out.print("Novo nome (" + clienteEditar.getNome() + "): ");
+                                String newNome = scanner.nextLine();
+                                System.out.print("Novo email (" + clienteEditar.getEmail() + "): ");
+                                String novoEmail = scanner.nextLine();
+                                System.out.print("Nova senha (" + clienteEditar.getSenha() + "): ");
+                                String novaSenha = scanner.nextLine();
+                                System.out.print("Novo endereço (" + clienteEditar.getEndereco() + "): ");
+                                String novoEndereco = scanner.nextLine();
+                                System.out.print("Novo telefone (" + clienteEditar.getTelefone() + "): ");
+                                String novoTelefone = scanner.nextLine();
+
+                                clienteEditar.setNome(newNome);
+                                clienteEditar.setEmail(novoEmail);
+                                clienteEditar.setSenha(novaSenha);
+                                clienteEditar.setEndereco(novoEndereco);
+                                clienteEditar.setTelefone(novoTelefone);
+
+                                boolean atualizado = controladorFuncionario.atualizarCliente(clienteEditar);                                if (atualizado) {
+                                    System.out.println("Cliente editado com sucesso!");
+                                } else {
+                                    System.out.println("Erro ao editar cliente.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Erro ao editar cliente: " + e.getMessage());
+                            }
+                            break;
+                        case 11:
+                            try {
+                                Cliente[] clientes = controladorCliente.listarClientes();
+                                System.out.println("Clientes cadastrados:");
+                                for (Cliente c : clientes) {
+                                    System.out.println(c.getId() + " - " + c.getNome() + " - " + c.getEmail());
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Erro ao listar clientes: " + e.getMessage());
+                            }
                             break;
                         case 0:
                             continuar = false;

@@ -13,4 +13,5 @@ public interface IControladorCarrinho {
     void removerItem(int idProduto, int quantidade) throws ProdutoNaoEncontradoException, CarrinhoVazioException, SistemaException;
     void limparCarrinho();
     Produto[] listarItens() throws CarrinhoVazioException;
+    int getQuantidadePorProduto(int idProduto) throws CarrinhoVazioException;
 }
