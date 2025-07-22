@@ -9,6 +9,13 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+import model.Cliente;
+import model.Funcionario;
+import repository.RepCliente;
+import repository.RepFuncionario;
+import controller.ControladorAcesso;
+import exceptions.SistemaException;
+import exceptions.AcessoNegadoException;
 
 public class ControladorLogin {
     private String tipoUsuario;
@@ -24,47 +31,81 @@ public class ControladorLogin {
 
     @FXML
     private void entrar() {
-        // Autenticação (simples)
-        if ("Cliente".equalsIgnoreCase(tipoUsuario)) {
-            String usuario = campoUsuario.getText();
-            String senha = campoSenha.getText();
+        String usuario = campoUsuario.getText();
+        String senha = campoSenha.getText();
 
-            // Busca cliente pelo e-mail
-            repository.RepCliente repCliente = repository.RepCliente.getInstancia();
-            model.Cliente clienteEncontrado = null;
-            for (model.Cliente c : repCliente.listarTodos()) {
-                if (c.getEmail().equalsIgnoreCase(usuario)) {
-                    clienteEncontrado = c;
-                    break;
+        try {
+            if ("Cliente".equalsIgnoreCase(tipoUsuario)) {
+                RepCliente repCliente = RepCliente.getInstancia();
+                Cliente clienteEncontrado = null;
+                for (Cliente c : repCliente.listarTodos()) {
+                    if (c.getEmail().equalsIgnoreCase(usuario) && c.getSenha().equals(senha)) {
+                        clienteEncontrado = c;
+                        break;
+                    }
+                }
+                if (clienteEncontrado != null) {
+                    abrirMenu("/view/MenuCliente.fxml", "Menu Cliente");
+                } else {
+                    mostrarErro("Usuário ou senha inválidos!");
+                }
+            } else if ("Admin".equalsIgnoreCase(tipoUsuario)) {
+                RepFuncionario repFuncionario = RepFuncionario.getInstancia();
+                Funcionario adminEncontrado = null;
+                for (Funcionario f : repFuncionario.listarTodos()) {
+                    if (f.getLogin().equalsIgnoreCase(usuario) && f.getSenha().equals(senha)) {
+                        try {
+                            if (ControladorAcesso.getInstancia().temPermissao(f, "ADMIN")) {
+                                adminEncontrado = f;
+                                break;
+                            }
+                        } catch (AcessoNegadoException e) {
+                            // Ignora e continua procurando
+                        } catch (SistemaException e) {
+                            // Ignora e continua procurando
+                        }
+                    }
+                }
+                if (adminEncontrado != null) {
+                    abrirMenu("/view/MenuAdmin.fxml", "Menu Admin");
+                } else {
+                    mostrarErro("Usuário ou senha inválidos ou sem permissão de administrador!");
+                }
+            } else if ("Funcionario".equalsIgnoreCase(tipoUsuario)) {
+                RepFuncionario repFuncionario = RepFuncionario.getInstancia();
+                Funcionario funcionarioEncontrado = null;
+                for (Funcionario f : repFuncionario.listarTodos()) {
+                    if (f.getLogin().equalsIgnoreCase(usuario) && f.getSenha().equals(senha)) {
+                        funcionarioEncontrado = f;
+                        break;
+                    }
+                }
+                if (funcionarioEncontrado != null) {
+                    abrirMenu("/view/MenuFuncionario.fxml", "Menu Funcionário");
+                } else {
+                    mostrarErro("Usuário ou senha inválidos!");
                 }
             }
-
-            if (clienteEncontrado != null && clienteEncontrado.getSenha().equals(senha)) {
-                // Login OK, abre MenuCliente.fxml
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MenuCliente.fxml"));
-                    Parent root = loader.load();
-                    Stage stage = new Stage();
-                    stage.setTitle("Menu Cliente");
-                    stage.setScene(new Scene(root));
-                    stage.show();
-
-                    // Fecha a janela de login
-                    campoUsuario.getScene().getWindow().hide();
-                } catch (Exception e) {
-                    Alert alerta = new Alert(AlertType.ERROR);
-                    alerta.setTitle("Erro");
-                    alerta.setHeaderText(null);
-                    alerta.setContentText("Falha ao abrir menu do cliente: " + e.getMessage());
-                    alerta.showAndWait();
-                }
-            } else {
-                Alert alerta = new Alert(AlertType.ERROR);
-                alerta.setTitle("Login");
-                alerta.setHeaderText(null);
-                alerta.setContentText("Usuário ou senha inválidos!");
-                alerta.showAndWait();
-            }
+        } catch (Exception e) {
+            mostrarErro("Erro ao autenticar: " + e.getMessage());
         }
+    }
+
+    private void abrirMenu(String fxml, String titulo) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+        Parent root = loader.load();
+        Stage stage = new Stage();
+        stage.setTitle(titulo);
+        stage.setScene(new Scene(root));
+        stage.show();
+        campoUsuario.getScene().getWindow().hide();
+    }
+
+    private void mostrarErro(String mensagem) {
+        Alert alerta = new Alert(AlertType.ERROR);
+        alerta.setTitle("Login");
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensagem);
+        alerta.showAndWait();
     }
 }

@@ -13,6 +13,10 @@ public class RepVenda implements IRepVenda {
     private RepVenda() {
         vendas = new Venda[TAMANHO_MAX];
         tamanhoAtual = 0;
+
+        vendas[tamanhoAtual++] = new Venda(1, 1, new Date(), 150.0, "CONCLUIDA");
+        vendas[tamanhoAtual++] = new Venda(2, 2, new Date(), 320.5, "PENDENTE");
+        vendas[tamanhoAtual++] = new Venda(3, 1, new Date(), 75.0, "CANCELADA");
     }
 
     public static synchronized RepVenda getInstancia() {

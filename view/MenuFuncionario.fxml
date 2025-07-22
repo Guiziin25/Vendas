@@ -8,7 +8,17 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="view.MenuFuncionario"
-            prefHeight="400.0" prefWidth="600.0">
-
+            fx:controller="controller.ControladorMenuFuncionario"
+            prefHeight="600.0" prefWidth="400.0">
+    <Button fx:id="btnListarProdutos" layoutX="30" layoutY="30" text="Listar produtos" onAction="#listarProdutos"/>
+    <Button fx:id="btnAdicionarProduto" layoutX="30" layoutY="70" text="Adicionar produto" onAction="#adicionarProduto"/>
+    <Button fx:id="btnRemoverProduto" layoutX="30" layoutY="110" text="Remover produto" onAction="#removerProduto"/>
+    <Button fx:id="btnEditarProduto" layoutX="30" layoutY="150" text="Editar produto" onAction="#editarProduto"/>
+    <Button fx:id="btnListarCategorias" layoutX="30" layoutY="190" text="Listar categorias" onAction="#listarCategorias"/>
+    <Button fx:id="btnEditarCategoria" layoutX="30" layoutY="230" text="Editar categoria" onAction="#editarCategoria"/>
+    <Button fx:id="btnExcluirCategoria" layoutX="30" layoutY="270" text="Excluir categoria" onAction="#excluirCategoria"/>
+    <Button fx:id="btnAdicionarCliente" layoutX="30" layoutY="310" text="Adicionar cliente" onAction="#adicionarCliente"/>
+    <Button fx:id="btnRemoverCliente" layoutX="30" layoutY="350" text="Remover cliente" onAction="#removerCliente"/>
+    <Button fx:id="btnEditarCliente" layoutX="30" layoutY="390" text="Editar cliente" onAction="#editarCliente"/>
+    <Button fx:id="btnListarClientes" layoutX="30" layoutY="430" text="Listar clientes" onAction="#listarClientes"/>
 </AnchorPane>
