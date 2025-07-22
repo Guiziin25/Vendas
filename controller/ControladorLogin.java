@@ -1,57 +1,70 @@
 package controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import javafx.stage.Stage;
 
 public class ControladorLogin {
+    private String tipoUsuario;
+
     @FXML
     private TextField campoUsuario;
     @FXML
     private PasswordField campoSenha;
-    @FXML
-    private Button botaoEntrar;
 
-    // Simulação de um banco de dados de usuários
-    private final Map<String, String> usuarios = new HashMap<>();
-
-    public ControladorLogin() {
-        // Usuários pré-definidos (usuário -> senha)
-        usuarios.put("cliente", "123");
-        usuarios.put("funcionario", "456");
-        usuarios.put("admin", "789");
-    }
-
-    public void initialize(URL location, ResourceBundle resources) {
-        exibirMensagem("Bem-vindo!", "Faça login para continuar.");
+    public void setTipoUsuario(String tipo) {
+        this.tipoUsuario = tipo;
     }
 
     @FXML
     private void entrar() {
-        String usuario = campoUsuario.getText();
-        String senha = campoSenha.getText();
+        // Autenticação (simples)
+        if ("Cliente".equalsIgnoreCase(tipoUsuario)) {
+            String usuario = campoUsuario.getText();
+            String senha = campoSenha.getText();
 
-        if (usuarios.containsKey(usuario) && usuarios.get(usuario).equals(senha)) {
-            exibirMensagem("Login bem-sucedido!", "Bem-vindo, " + usuario + "!");
-            // Aqui você pode redirecionar para outra tela
-        } else {
-            exibirMensagem("Erro de autenticação", "Usuário ou senha inválidos.");
+            // Busca cliente pelo e-mail
+            repository.RepCliente repCliente = repository.RepCliente.getInstancia();
+            model.Cliente clienteEncontrado = null;
+            for (model.Cliente c : repCliente.listarTodos()) {
+                if (c.getEmail().equalsIgnoreCase(usuario)) {
+                    clienteEncontrado = c;
+                    break;
+                }
+            }
+
+            if (clienteEncontrado != null && clienteEncontrado.getSenha().equals(senha)) {
+                // Login OK, abre MenuCliente.fxml
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MenuCliente.fxml"));
+                    Parent root = loader.load();
+                    Stage stage = new Stage();
+                    stage.setTitle("Menu Cliente");
+                    stage.setScene(new Scene(root));
+                    stage.show();
+
+                    // Fecha a janela de login
+                    campoUsuario.getScene().getWindow().hide();
+                } catch (Exception e) {
+                    Alert alerta = new Alert(AlertType.ERROR);
+                    alerta.setTitle("Erro");
+                    alerta.setHeaderText(null);
+                    alerta.setContentText("Falha ao abrir menu do cliente: " + e.getMessage());
+                    alerta.showAndWait();
+                }
+            } else {
+                Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setTitle("Login");
+                alerta.setHeaderText(null);
+                alerta.setContentText("Usuário ou senha inválidos!");
+                alerta.showAndWait();
+            }
         }
-    }
-
-    private void exibirMensagem(String titulo, String mensagem) {
-        Alert alerta = new Alert(AlertType.INFORMATION);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensagem);
-        alerta.showAndWait();
     }
 }

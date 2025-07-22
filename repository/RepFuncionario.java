@@ -5,6 +5,7 @@ import model.FuncionarioAssalariado;
 import model.FuncionarioComissionado;
 import model.FuncionarioHorista;
 import repository.Interfaces.IRepFuncionario;
+import java.util.Date;
 
 public class RepFuncionario implements IRepFuncionario {
     private static RepFuncionario instancia;  // Adicionando Singleton
@@ -16,6 +17,22 @@ public class RepFuncionario implements IRepFuncionario {
     private RepFuncionario() {
         this.funcionarios = new Funcionario[TAMANHO_MAXIMO];
         this.quantidade = 0;
+
+        adicionar(new FuncionarioAssalariado(
+                1, "Guilherme", "123.456.789-00", "gui@empresa.com", "11999999999", new Date(),
+                "Analista de Sistemas", "TI", "gui", "senha", new String[]{"ADMIN"},
+                3500.0, 500.0 // salarioBase, beneficios
+        ));
+        adicionar(new FuncionarioComissionado(
+                2, "Gonzaga", "987.654.321-00", "gonzaga@empresa.com", "11988888888", new Date(),
+                "Vendedor", "Comercial", "gonzaga", "senha", new String[]{"VENDEDOR"},
+                20000.0, 0.05 // vendasMes, taxaComissao
+        ));
+        adicionar(new FuncionarioHorista(
+                3, "Ana", "111.222.333-44", "ana@empresa.com", "11977777777", new Date(),
+                "Operador", "Produção", "ana", "senha", new String[]{"HORISTA"},
+                25.0, 160.0, true // valorHora, horasTrabalhadas, recebeAdicionalNoturno
+        ));
     }
 
     // Método Singleton (thread-safe)

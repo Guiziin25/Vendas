@@ -14,6 +14,10 @@ public class RepProduto implements IRepProduto {
         produtos = new Produto[TAMANHO_MAX];
         imagensProdutos = new String[TAMANHO_MAX][10]; // Máximo 10 imagens por produto
         tamanhoAtual = 0;
+
+        adicionar(new Produto(1, "Notebook", "Notebook Dell Inspiron 15", 3500.00, "Informática", 15, 3, "notebook.png"));
+        adicionar(new Produto(2, "Mouse", "Mouse Logitech sem fio", 120.00, "Informática", 40, 5, "mouse.png"));
+        adicionar(new Produto(3, "Teclado", "Teclado mecânico RGB", 250.00, "Informática", 25, 4, "teclado.png"));
     }
 
     public static synchronized RepProduto getInstancia() {

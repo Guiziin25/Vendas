@@ -13,6 +13,10 @@ public class RepCliente implements IRepCliente {
     private RepCliente() {
         clientes = new Cliente[TAMANHO_MAX];
         tamanhoAtual = 0;
+
+        adicionar(new Cliente(1, "João Oliveira", "joao@exemplo.com", "senha123", "Rua A, 123", "11999990001"));
+        adicionar(new Cliente(2, "Maria Souza", "maria@exemplo.com", "senha456", "Av. B, 456", "11999990002"));
+        adicionar(new Cliente(3, "Carlos Lima", "carlos@exemplo.com", "senha789", "Travessa C, 789", "11999990003"));
     }
 
     // Método Singleton (thread-safe)
